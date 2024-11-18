@@ -17,7 +17,6 @@ equinox==0.11.8
 etils==1.10.0
 fastjsonschema==2.20.0
 fonttools==4.55.0
--e git+https://github.com/armercier/Hybrid-OED.git@171ec00230e44cd1483b723fb2dbc731ca3d36b7#egg=hybridoed
 idna==3.10
 imagesize==1.4.1
 iniconfig==2.0.0
