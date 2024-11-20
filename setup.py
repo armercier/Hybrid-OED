@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 setup(
     name='hybridoed',  # Replace with your package's name
     version='0.1.0',  # Semantic versioning
-    description='A Python package for simulations',  # Short description
+    description='Exploring the possibility of combining OED and differentiable physics to design better inverse problems.',  # Short description
     long_description=open('README.md').read(),  # Long description from README
     long_description_content_type='text/markdown',  # If your README is in Markdown
-    author='Your Name',  # Your name
-    author_email='your.email@example.com',  # Your email
+    author='Arnaud Mercier',  # Your name
+    author_email='arnaud.mercier05@gmail.com',  # Your email
     url='https://github.com/armercier/Hybrid-OED',  # URL to your project
     license='MIT',  # License type
     packages=find_packages(where='src'),  # Automatically find subpackages in src/
