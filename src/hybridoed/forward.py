@@ -130,7 +130,6 @@ def solve_helmholtz_general(sound_speed: jnp.ndarray, domain: Domain, src_coord:
     medium = Medium(
         domain=domain, 
         sound_speed=sound_speed, 
-        density=1000.0, 
         pml_size=pml_size
     )
     field = helmholtz_solver(medium, omega, src)
