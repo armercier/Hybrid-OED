@@ -293,6 +293,92 @@ four nearest grid points.</p></li>
 </div>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.get_analytical_greens_function">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">get_analytical_greens_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acoustic_velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#get_analytical_greens_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.get_analytical_greens_function" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the Green’s function for a 2D wave equation.</p>
+<p>This function calculates the analytical Green’s function for a 2D wave equation given
+the dimensions of the domain, source location, and frequency. The function
+uses the Hankel function of the first kind to compute the Green’s function
+in two dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>L_x</strong> (<em>int</em>) – Length of the domain in the x-direction (number of grid points) in meters.</p></li>
+<li><p><strong>L_y</strong> (<em>int</em>) – Length of the domain in the y-direction (number of grid points) in meters.</p></li>
+<li><p><strong>acoustic_velocity</strong> (<em>float</em>) – The velocity of the medium (in m/s).</p></li>
+<li><p><strong>x_source</strong> (<em>float</em>) – x-coordinate of the source point.</p></li>
+<li><p><strong>y_source</strong> (<em>float</em>) – y-coordinate of the source point.</p></li>
+<li><p><strong>f</strong> (<em>float</em>) – Frequency of the wave (in Hz).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array representing the Green’s function values at each grid point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>jax.numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The Green’s function in 2D is computed using the formula:
+<cite>G = (1j / 4) * Hankel1(0, K * R)</cite>
+where <cite>K</cite> is the wave number, <cite>R</cite> is the distance between observation
+and source points, and <cite>Hankel1</cite> is the Hankel function of the first kind.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">L_x</span><span class="p">,</span> <span class="n">L_y</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">acoustic_velocity</span> <span class="o">=</span> <span class="mf">1500.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x_source</span><span class="p">,</span> <span class="n">y_source</span> <span class="o">=</span> <span class="mf">50.0</span><span class="p">,</span> <span class="mf">50.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="mf">1e3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span> <span class="o">=</span> <span class="n">get_analytical_greens_function</span><span class="p">(</span><span class="n">L_x</span><span class="p">,</span> <span class="n">L_y</span><span class="p">,</span> <span class="n">acoustic_velocity</span><span class="p">,</span> <span class="n">x_source</span><span class="p">,</span> <span class="n">y_source</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">G</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 100)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.solve_helmholtz_general">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">solve_helmholtz_general</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#solve_helmholtz_general"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.solve_helmholtz_general" title="Link to this definition">¶</a></dt>
+<dd><p>Solve the general Helmholtz equation for a given sound speed distribution, source location, and frequency.</p>
+<p>This function computes the acoustic field by solving the Helmholtz equation in a medium
+characterized by a given sound speed. It creates a source field, defines the medium properties,
+and solves the Helmholtz equation using a specified solver.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sound_speed</strong> (<em>numpy.ndarray</em>) – A 2D array representing the spatial distribution of sound speed in the medium (in m/s).</p></li>
+<li><p><strong>src_coord</strong> (<em>tuple</em>) – A tuple (x, y) specifying the source location in the domain (indices).</p></li>
+<li><p><strong>omega</strong> (<em>float</em>) – Angular frequency of the wave (in rad/s).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A 2D array representing the acoustic field on the grid, with dimensions matching the sound speed array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The <cite>create_src_field</cite> function is used to generate the source field based on the source coordinates.</p></li>
+<li><p>The medium is modeled with a density of 1000 kg/m³ and includes Perfectly Matched Layer (PML) boundaries.</p></li>
+<li><p>The Helmholtz equation is solved using the <cite>helmholtz_solver</cite> function.</p></li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sound_speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span> <span class="o">*</span> <span class="mi">1500</span>  <span class="c1"># Speed of sound in water</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">src_coord</span> <span class="o">=</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>  <span class="c1"># Source in the center</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">omega</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">1e3</span>  <span class="c1"># 1 kHz frequency</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">field</span> <span class="o">=</span> <span class="n">solve_helmholtz_general</span><span class="p">(</span><span class="n">sound_speed</span><span class="p">,</span> <span class="n">src_coord</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">field</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(100, 100)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 <section id="module-hybridoed">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-hybridoed" title="Link to this heading">¶</a></h2>
@@ -350,6 +436,8 @@ four nearest grid points.</p></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-hybridoed.forward">hybridoed.forward module</a><ul>
 <li><a class="reference internal" href="#hybridoed.forward.create_src_field"><code class="docutils literal notranslate"><span class="pre">create_src_field()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.get_analytical_greens_function"><code class="docutils literal notranslate"><span class="pre">get_analytical_greens_function()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.solve_helmholtz_general"><code class="docutils literal notranslate"><span class="pre">solve_helmholtz_general()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-hybridoed">Module contents</a></li>
