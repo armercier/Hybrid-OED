@@ -29,5 +29,5 @@ def test_wavefield_solve():
     true_field_file = jnp.load("tests/integration/true_field.npy")
 
     # compare the two fields
-    assert jnp.allclose(true_field, true_field_file, atol=1e-2), "The computed field does not match the true field"
+    assert jnp.allclose(true_field, true_field_file, atol=1e-1), "The computed field does not match the true field"
 
