@@ -136,7 +136,6 @@ def solve_helmholtz_general(sound_speed: jnp.ndarray, domain: Domain, src_coord:
     return field.on_grid.squeeze()
 
 
-
 def get_analytical_greens_function(L_x, L_y, acoustic_velocity, x_source, y_source, f):
     """
     Compute the Green's function for a 2D wave equation.
