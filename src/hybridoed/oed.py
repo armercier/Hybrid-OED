@@ -14,7 +14,7 @@ def eigenvalue_criterion(J_o, threshold=0.5):
     # return jnp.where(eigenvalues > threshold, 1.0, 0.0).sum()  # Hard selection
 
 
-def iterative_selection_no_reselection(J_c, num_rows, threshold=0.5):
+def iterative_selection_no_reselection(J_c, num_rows, threshold=10e-22):
     """Iteratively build J_o while preventing reselection of rows."""
     n, m = J_c.shape
 
