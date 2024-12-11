@@ -1,10 +1,10 @@
 import jax.numpy as jnp
-
+import numpy as np
 def test_sequential_oed():
     from hybridoed.oed import iterative_selection_no_reselection
 
     
-    loaded_data = jnp.load('tests/integration/arrays_complete.npz',allow_pickle=True)
+    loaded_data = np.load('tests/integration/arrays_complete.npz')
 
     # # # Access arrays by index
     loaded_arrays = [loaded_data[f'arr_{i}'] for i in range(len(loaded_data))]
