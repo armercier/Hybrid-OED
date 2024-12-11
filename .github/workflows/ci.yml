@@ -19,6 +19,14 @@ jobs:
       with:
         lfs: true  # Fetches Git LFS files
 
+    - name: Pull LFS objects
+      run: git lfs pull 
+
+    - name: Verify LFS file
+      run: |
+        ls -lh tests/integration/arrays_complete.npz
+        file tests/integration/arrays_complete.npz
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
