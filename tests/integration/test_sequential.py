@@ -6,19 +6,17 @@ def test_sequential_oed():
     
     loaded_data = jnp.load('tests/integration/arrays_complete.npz')
 
-    print(len(loaded_data))
 
     # # # Access arrays by index
     loaded_arrays = [loaded_data[f'arr_{i}'] for i in range(len(loaded_data))]
 
-    print(len(loaded_arrays))
     
 
     # vstack teh arrays
     J_c = (jnp.vstack(loaded_arrays))
 
-    if J_c.shape[0] != 100:
-        raise ValueError(f"Expected 100 rows, got {J_c.shape[0]}")
+    if J_c.shape != (1000, 32768):
+        raise ValueError(f"Expected 1000 rows, got {J_c.shape[0]} and 32768 columns, got {J_c.shape[1]}")
 
     # Run the algorithm with logging
     num_rows = 9
@@ -35,5 +33,5 @@ def test_sequential_oed():
     assert ordered_list == [0, 3, 6, 108, 176, 318, 358, 421, 550]
 
 
-# Run the test
-test_sequential_oed()
+# # Run the test
+# test_sequential_oed()
