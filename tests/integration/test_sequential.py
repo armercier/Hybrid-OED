@@ -17,12 +17,18 @@ def test_sequential_oed():
 
     if J_c.shape != (1000, 32768):
         raise ValueError(f"Expected 1000 rows, got {J_c.shape[0]} and 32768 columns, got {J_c.shape[1]}")
+    
+    print(f"J_c shape: {J_c.shape}")
+    print(f"J_c min: {jnp.min(J_c)}, max: {jnp.max(J_c)}, mean: {jnp.mean(J_c)}")
 
     # Run the algorithm with logging
     num_rows = 9
     threshold = 10e-22
-    J_o_final, O_final, mask_history, criterion_log = iterative_selection_no_reselection(J_c, num_rows, threshold)
+    J_o_final, O_final, mask_history, criterion_log = iterative_selection_no_reselection(J_c, num_rows, threshold=threshold)
     
+
+    print("O_final shape: ", O_final.shape)
+
     # Extract the selected row indices
     selected_rows = jnp.where(O_final.flatten() == 1)[0]
 
