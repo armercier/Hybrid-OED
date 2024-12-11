@@ -1,6 +1,7 @@
 import jax
 import jax.numpy as jnp
 from jax.lax import cond, scan
+jax.config.update("jax_enable_x64", True)
 
 
 def eigenvalue_criterion(J_o, threshold=0.5):
