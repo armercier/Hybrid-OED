@@ -26,6 +26,8 @@ def test_sequential_oed():
     # Extract the selected row indices
     selected_rows = jnp.where(O_final.flatten() == 1)[0]
 
+    print(selected_rows)
+
     ordered_list = []
     for iteration, row_idx in enumerate(selected_rows):
         ordered_list.append(row_idx.item())
