@@ -10,7 +10,8 @@ def eigenvalue_criterion(J_o, threshold=0.5):
     # JTJ = J_o @ J_o.T
     # eigenvalues = jnp.linalg.eigh(JTJ)[0]  # Get eigenvalues (sorted in ascending order)
     eigenvalues = jnp.sort(jnp.linalg.svdvals(J_o)**2)[::-1]
-    sharpness = 1/threshold * 100000
+    # sharpness = 1/threshold * 100000 # Sharpness parameter for MODJO benchmark
+    sharpness = 1 / threshold   # Sharpness parameter for curvel
     return jnp.sum(jax.nn.sigmoid(sharpness * (eigenvalues - threshold)))  # Differentiable "count" above threshold
     # return jnp.where(eigenvalues > threshold, 1.0, 0.0).sum()  # Hard selection
 
