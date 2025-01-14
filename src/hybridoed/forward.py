@@ -204,3 +204,65 @@ def get_analytical_greens_function(L_x, L_y, acoustic_velocity, x_source, y_sour
     A = 1j / 4
     G = A * hankel1(0, K * R)
     return G
+
+def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=5, num_receivers=5):
+    """
+    Generate a 2D grid of positions for sources and receivers with more sources than receivers,
+    arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.
+
+    Parameters:
+    - N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
+    - num_sources: int, number of source positions along each axis.
+    - num_receivers: int, number of receiver positions along each axis.
+
+    Returns:
+    - src_coords: jnp.ndarray, source positions as a 2D array.
+    - recv_coords: jnp.ndarray, receiver positions as a 2D array.
+    """
+    Nx, Ny = N
+
+    # Generate evenly spaced indices for sources
+    src_x = jnp.linspace(5, Nx - 5, num_sources, dtype=jnp.float32)
+    src_y = jnp.linspace(5, Ny - 5, num_sources, dtype=jnp.float32)
+
+    # Compute receiver positions with fewer points
+    recv_x = jnp.linspace(5 + (src_x[1] - src_x[0]) / 2 + 0.1, Nx - 5 - (src_x[1] - src_x[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
+    recv_y = jnp.linspace(5 + (src_y[1] - src_y[0]) / 2 + 0.1, Ny - 5 - (src_y[1] - src_y[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
+
+    # Create 2D grid coordinates for sources and receivers
+    src_coords = jnp.array([[x + 0.1, y + 0.1] for x in src_x for y in src_y], dtype=jnp.int32)
+    recv_coords = jnp.array([[x + 0.1, y + 0.1] for x in recv_x for y in recv_y], dtype=jnp.int32)
+
+    return src_coords, recv_coords
+
+
+
+# def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=20, num_receivers=10): (test case B)
+#     """
+#     Generate a 2D grid of positions for sources and receivers with more sources than receivers,
+#     arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.
+
+#     Parameters:
+#     - N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
+#     - num_sources: int, number of source positions along each axis.
+#     - num_receivers: int, number of receiver positions along each axis.
+
+#     Returns:
+#     - src_coords: jnp.ndarray, source positions as a 2D array.
+#     - recv_coords: jnp.ndarray, receiver positions as a 2D array.
+#     """
+#     Nx, Ny = N
+
+#     # Generate evenly spaced indices for sources
+#     src_x = jnp.linspace(5, Nx - 5, num_sources, dtype=jnp.float32)
+#     src_y = jnp.linspace(5, Ny - 5, num_sources, dtype=jnp.float32)
+
+#     # Compute receiver positions with fewer points
+#     recv_x = jnp.linspace(5 + (Nx - 10) / (2 * num_receivers), Nx - 5 - (Nx - 10) / (2 * num_receivers), num_receivers, dtype=jnp.float32)
+#     recv_y = jnp.linspace(5 + (Ny - 10) / (2 * num_receivers), Ny - 5 - (Ny - 10) / (2 * num_receivers), num_receivers, dtype=jnp.float32)
+
+#     # Create 2D grid coordinates for sources and receivers
+#     src_coords = jnp.array([[x, y] for x in src_x for y in src_y], dtype=jnp.int32)
+#     recv_coords = jnp.array([[x, y] for x in recv_x for y in recv_y], dtype=jnp.int32)
+
+#     return src_coords, recv_coords
