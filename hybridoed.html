@@ -294,6 +294,20 @@ four nearest grid points.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.generate_2D_gridded_src_rec_positions">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_2D_gridded_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(70,</span> <span class="pre">70)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_receivers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_2D_gridded_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a 2D grid of positions for sources and receivers with more sources than receivers,
+arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.</p>
+<p>Parameters:
+- N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
+- num_sources: int, number of source positions along each axis.
+- num_receivers: int, number of receiver positions along each axis.</p>
+<p>Returns:
+- src_coords: jnp.ndarray, source positions as a 2D array.
+- recv_coords: jnp.ndarray, receiver positions as a 2D array.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hybridoed.forward.get_analytical_greens_function">
 <span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">get_analytical_greens_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acoustic_velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#get_analytical_greens_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.get_analytical_greens_function" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the Green’s function for a 2D wave equation.</p>
@@ -436,6 +450,7 @@ and solves the Helmholtz equation using a specified solver.</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-hybridoed.forward">hybridoed.forward module</a><ul>
 <li><a class="reference internal" href="#hybridoed.forward.create_src_field"><code class="docutils literal notranslate"><span class="pre">create_src_field()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions"><code class="docutils literal notranslate"><span class="pre">generate_2D_gridded_src_rec_positions()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.get_analytical_greens_function"><code class="docutils literal notranslate"><span class="pre">get_analytical_greens_function()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.solve_helmholtz_general"><code class="docutils literal notranslate"><span class="pre">solve_helmholtz_general()</span></code></a></li>
 </ul>
