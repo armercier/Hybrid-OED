@@ -4,19 +4,23 @@ from jax import lax
 from jax.lax import cond, scan
 
 
-def eigenvalue_criterion(J_o, threshold=0.5):
+def eigenvalue_criterion(J_o, threshold=0.5, sharpness=None):
     """Compute the eigenvalue-based selection criterion."""
     # JTJ = J_o.T @ J_o
     # JTJ = J_o @ J_o.T
     # eigenvalues = jnp.linalg.eigh(JTJ)[0]  # Get eigenvalues (sorted in ascending order)
     eigenvalues = jnp.sort(jnp.linalg.svdvals(J_o)**2)[::-1]
     # sharpness = 1/threshold * 100000 # Sharpness parameter for MODJO benchmark
-    sharpness = 1 / threshold   # Sharpness parameter for curvel
+    if sharpness is None:
+        sharpness = 1 / threshold   # Sharpness parameter for curvel
+    elif sharpness == "MODJO":
+        sharpness = 1 / threshold * 100000
+        print("Sharpness: ", sharpness)
     return jnp.sum(jax.nn.sigmoid(sharpness * (eigenvalues - threshold)))  # Differentiable "count" above threshold
     # return jnp.where(eigenvalues > threshold, 1.0, 0.0).sum()  # Hard selection
 
 
-def iterative_selection_no_reselection(J_c, num_rows, n_freq, n_receivers, selection_mode="single", threshold=10e-22):
+def iterative_selection_no_reselection(J_c, num_rows, n_freq, n_receivers, selection_mode="single", threshold=10e-22, sharpness=None):
     """
     Iteratively build J_o while preventing reselection of rows, allowing for single row or block selection.
 
@@ -47,7 +51,7 @@ def iterative_selection_no_reselection(J_c, num_rows, n_freq, n_receivers, selec
         # Current criterion based on active rows
         current_criterion = jax.lax.cond(
             mask.sum() > 0,
-            lambda _: eigenvalue_criterion(active_J_o, threshold),
+            lambda _: eigenvalue_criterion(active_J_o, threshold, sharpness),
             lambda _: 0.0,
             operand=None,
         )
@@ -56,7 +60,7 @@ def iterative_selection_no_reselection(J_c, num_rows, n_freq, n_receivers, selec
             def compute_score(row):
                 zero_row_idx = jnp.argmax(jnp.all(active_J_o == 0, axis=1))
                 augmented_J_o = active_J_o.at[zero_row_idx].set(row)
-                return eigenvalue_criterion(augmented_J_o, threshold) - current_criterion
+                return eigenvalue_criterion(augmented_J_o, threshold, sharpness) - current_criterion
 
             scores = jax.vmap(compute_score)(J_c)
 

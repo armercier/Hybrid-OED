@@ -24,7 +24,7 @@ def test_sequential_oed():
     # Run the algorithm with logging
     num_rows = 9
     threshold = 10e-22
-    J_o_final, O_final, mask_history, criterion_log = iterative_selection_no_reselection(J_c, num_rows,n_freq=5,n_receivers=20, threshold=threshold)
+    J_o_final, O_final, mask_history, criterion_log = iterative_selection_no_reselection(J_c, num_rows,n_freq=5,n_receivers=20, threshold=threshold, sharpness="MODJO")
     
 
     print("O_final shape: ", O_final.shape)
@@ -42,4 +42,4 @@ def test_sequential_oed():
 
 
 # # Run the test
-# test_sequential_oed()
+test_sequential_oed()
