@@ -252,6 +252,39 @@
 <section id="module-hybridoed.forward">
 <span id="hybridoed-forward-module"></span><h2>hybridoed.forward module<a class="headerlink" href="#module-hybridoed.forward" title="Link to this heading">¶</a></h2>
 <dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.acoustic2D">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">acoustic2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_wavefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#acoustic2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.acoustic2D" title="Link to this definition">¶</a></dt>
+<dd><p>Simulate seismic waves through a 2D velocity model</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.acoustic2D_pml">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">acoustic2D_pml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_wavefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_coeff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#acoustic2D_pml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.acoustic2D_pml" title="Link to this definition">¶</a></dt>
+<dd><p>2D acoustic FD with a simple PML/sponge absorbing boundary,
+and the Ricker source scaled per seismicCPML normalization.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.acoustic2D_pml_4th_minmem">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">acoustic2D_pml_4th_minmem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_wavefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_coeff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#acoustic2D_pml_4th_minmem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.acoustic2D_pml_4th_minmem" title="Link to this definition">¶</a></dt>
+<dd><p>4th-order accurate, memory-optimized 2D acoustic FD with boundary-only PML.</p>
+<ul class="simple">
+<li><p>Uses a 5-point stencil for ∂²/∂x² and ∂²/∂y² (4th-order) to allow coarser grid.</p></li>
+<li><p>Stores only two time-levels.</p></li>
+<li><p>PML damping β defined only on a width-pml boundary via 1D profiles and masked application.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.acoustic2D_pml_minmem">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">acoustic2D_pml_minmem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velocity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_is</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_wavefield</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_coeff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#acoustic2D_pml_minmem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.acoustic2D_pml_minmem" title="Link to this definition">¶</a></dt>
+<dd><p>Memory‐optimized 2D acoustic FD with PML absorbing boundary.</p>
+<p>This version stores only two time‐levels and uses 1D PML profiles,
+avoiding a full 2D sigma array. It also allows dropping the wavefield
+output to save memory if only receiver traces are needed.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hybridoed.forward.create_src_field">
 <span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">create_src_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#create_src_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.create_src_field" title="Link to this definition">¶</a></dt>
 <dd><p>Create a source field with bilinear interpolation at the given (x, y) coordinates
@@ -354,6 +387,27 @@ and source points, and <cite>Hankel1</cite> is the Hankel function of the first 
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.ricker_wavelet">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">ricker_wavelet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#ricker_wavelet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.ricker_wavelet" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a Ricker wavelet with a time shift.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> (<em>array-like</em>) – Time axis (e.g., jax.numpy array).</p></li>
+<li><p><strong>f</strong> (<em>float</em>) – Central frequency of the wavelet.</p></li>
+<li><p><strong>t_shift</strong> (<em>float</em>) – Time shift for the wavelet (default is 0.0).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ricker wavelet values at the given time points.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>jax.numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="hybridoed.forward.solve_helmholtz_general">
 <span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">solve_helmholtz_general</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sound_speed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Domain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_coord</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">omega</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pml_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#solve_helmholtz_general"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.solve_helmholtz_general" title="Link to this definition">¶</a></dt>
 <dd><p>Solve the general Helmholtz equation for a given sound speed distribution, source location, and frequency.</p>
@@ -449,9 +503,14 @@ and solves the Helmholtz equation using a specified solver.</p>
 <li><a class="reference internal" href="#">hybridoed package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-hybridoed.forward">hybridoed.forward module</a><ul>
+<li><a class="reference internal" href="#hybridoed.forward.acoustic2D"><code class="docutils literal notranslate"><span class="pre">acoustic2D()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.acoustic2D_pml"><code class="docutils literal notranslate"><span class="pre">acoustic2D_pml()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.acoustic2D_pml_4th_minmem"><code class="docutils literal notranslate"><span class="pre">acoustic2D_pml_4th_minmem()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.acoustic2D_pml_minmem"><code class="docutils literal notranslate"><span class="pre">acoustic2D_pml_minmem()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.create_src_field"><code class="docutils literal notranslate"><span class="pre">create_src_field()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions"><code class="docutils literal notranslate"><span class="pre">generate_2D_gridded_src_rec_positions()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.get_analytical_greens_function"><code class="docutils literal notranslate"><span class="pre">get_analytical_greens_function()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.ricker_wavelet"><code class="docutils literal notranslate"><span class="pre">ricker_wavelet()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.solve_helmholtz_general"><code class="docutils literal notranslate"><span class="pre">solve_helmholtz_general()</span></code></a></li>
 </ul>
 </li>
