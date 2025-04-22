@@ -16,6 +16,29 @@
 # # Test case D: FWI L1 norm as an criterion
 
 # %%
+import os
+
+###############################################################################
+# Decide on CPU or GPU here
+use_gpu = True  # Set to False if you want CPU only
+###############################################################################
+
+if use_gpu:
+    # Prevent JAX from preallocating most of the GPU memory
+    os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+    # Force JAX to use GPU
+    import jax
+    jax.config.update("jax_platform_name", "gpu")
+else:
+    # Force JAX to use CPU
+    import jax
+    jax.config.update("jax_platform_name", "cpu")
+
+# %%
+# os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+# Now JAX won't pre-allocate GPU memory
+
+# %%
 import numpy as np
 from jax import jit, vjp, vmap, pmap, random, value_and_grad, nn, profiler
 import jax
@@ -34,17 +57,14 @@ from jwave.utils import display_complex_field
 key = random.PRNGKey(42)  # Random seed
 
 
-from hybridoed.forward import create_src_field, generate_2D_gridded_src_rec_positions
+from hybridoed.forward import create_src_field, generate_2D_gridded_src_rec_positions, ricker_wavelet, acoustic2D, acoustic2D_pml,acoustic2D_pml_minmem, acoustic2D_pml_4th_minmem
 from hybridoed.oed import *
 
 
 from jwave.geometry import Domain, Medium
 from jwave.utils import display_complex_field
 
-key = random.PRNGKey(42)  # Random seed
 
-
-from hybridoed.forward import create_src_field
 from hybridoed.oed import *
 
 from functools import partial
@@ -68,6 +88,8 @@ from jwave.signal_processing import apply_ramp, gaussian_window, smooth
 from jwave.signal_processing import analytic_signal
 from jaxdf.operators import gradient, functional
 
+import time
+
 
 # %%
 # save_device_memory_profile('memory_profile.json')
@@ -79,12 +101,12 @@ from jaxdf.operators import gradient, functional
 
 model = jnp.load('model1.npy')
 
-
 print(model.shape)
 
-model_index = 7
+model_index = 84
 
 true_model = model[model_index,0,:,:]
+# true_model = model
 plt.imshow(true_model)
 plt.colorbar()
 plt.show()
@@ -110,60 +132,26 @@ homogenous_model = jnp.ones(true_model.shape) * jnp.mean(true_model)
 
 # plt.imshow(homogenous_model)
 
+# %% [markdown]
+# ## Define domain
+
 # %%
-N = (70, 70)  # Grid size
+# check if the model size and assidn N to it
+if true_model.ndim == 2:
+    N = true_model.shape
+    
 dx = (1.0, 1.0)  # Spatial resolution
 cfl=0.75
 
 # Defining the domain
 domain = Domain(N, dx)
-
-source_freq = 200
-source_mag = 1.3e-1
-# source_mag = 1.3
-
-medium = Medium(domain=domain, sound_speed=true_model, density=1000., pml_size=10)
-
-# Time axis
-time_axis = TimeAxis.from_medium(medium, cfl=cfl)
-t = time_axis.to_array()
-source_mag = source_mag / time_axis.dt
-
-s1 = source_mag * jnp.sin(2 * jnp.pi * source_freq * t + 100)
-signal = gaussian_window(apply_ramp(s1, time_axis.dt, source_freq), t, 0.5e-2, 1e-2)
-
-# generate a ricker signal instead of a sinusoidal signal
-
-def ricker_wavelet(t, f, t_shift=0.0):
-    """
-    Generate a Ricker wavelet with a time shift.
-
-    Parameters:
-        t (array-like): Time axis (e.g., jax.numpy array).
-        f (float): Central frequency of the wavelet.
-        t_shift (float): Time shift for the wavelet (default is 0.0).
-
-    Returns:
-        jax.numpy.ndarray: Ricker wavelet values at the given time points.
-    """
-    t_shifted = t - t_shift  # Apply the time shift
-    pi2 = (jnp.pi ** 2)
-    a = (pi2 * f ** 2) * (t_shifted ** 2)
-    wavelet = (1 - 2 * a) * jnp.exp(-a)
-    return wavelet
+medium = Medium(domain=domain, sound_speed=true_model, density=1000., pml_size=20)
 
 
-# Parameters
-# source_freq = 25.0  # Central frequency in Hz
-# t = jnp.linspace(-0.1, 0.2, 1000)  # Time vector in seconds
-t_shift = 0.005  # Time shift in seconds
+# %% [markdown]
+# ## Define sources and receivers positions
 
-# Generate the Ricker wavelet with time shift
-signal = source_mag * ricker_wavelet(t, source_freq, t_shift)
-
-
-
-
+# %%
 src_coords_list, receiver_coords_list = generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=5, num_receivers=5)
 
 
@@ -172,11 +160,118 @@ sensors_positions = (receiver_coords_list[:,0],receiver_coords_list[:,1])
 sensors = Sensors(positions=sensors_positions)
 source_positions = (src_coords_list[:,0],src_coords_list[:,1])
 
+# mask the sensors positions in the domain
+mask = jnp.ones(domain.N)
+mask = mask.at[sensors_positions[0], sensors_positions[1]].set(0.0)
+
 print(sensors_positions)
+print(source_positions)
+
+# %%
+f0 = 200
+dx = dy = 0.8
+dt_ben = 12e-5
+# n_steps = int(326 * 3.63)
+n_steps = int(326 * 0.8)
+
+density = jnp.ones_like(true_model) * 1000.0
+
+# transform the sensors positions to the the same format as the receiver_is
+receiver_is_modif = jnp.stack([sensors_positions[0], sensors_positions[1]], axis=-1)
+source_modif = jnp.stack([source_positions[0], source_positions[1]], axis=-1)
+# make the y coordinate 70 - y coordinate (seond value of the tuple)
+# receiver_is_modif = jnp.stack([receiver_is_modif[:,0], 70 - receiver_is_modif[:,1]], axis=-1)
+# source_modif = jnp.stack([source_modif[:,0], 70 - source_modif[:,1]], axis=-1)
+# print(source_modif,receiver_is_modif)
 
 
-# Show comprehensive simulation setup
+# Use vmap to simulate wave propagation for all sources
+# simulate_for_source = lambda source_i: acoustic2D(true_model, density, source_i, f0, dx, dy, dt_ben, n_steps, receiver_is_modif)
+simulate_for_source = lambda source_i: acoustic2D_pml_minmem(true_model, density, source_i, f0, dx, dy, dt_ben, n_steps, receiver_is_modif, pml_width=1)
+# simulate_for_source = lambda source_i: acoustic2D_pml_4th_minmem(true_model, density, source_i, f0, dx, dy, dt_ben, n_steps, receiver_is_modif, pml_width=10)
+p_data_ben, wavefields = vmap(simulate_for_source)(source_modif)
 
+
+# %%
+gat, wave = acoustic2D_pml(jnp.fliplr(true_model.T), density, source_modif[0], f0, dx, dy, dt_ben, n_steps, receiver_is_modif)
+print(source_modif[0])
+
+# %%
+jnp.fliplr(true_model.T)[5,5]
+
+# %%
+# plot the gather for the first source
+maximum = np.amax(np.abs(p_data_ben[12]))
+# minimum = np.amin(p_data_ben[12])
+plt.imshow((p_data_ben[0]), cmap="RdBu_r", interpolation="nearest", aspect="auto")
+plt.colorbar()
+plt.title('Gather for Source 0')
+plt.show()
+print(p_data_ben.shape)
+
+# %%
+# f0 = 1150
+t0 = 1.2 / f0
+factor = 1e3
+pressure_future = jnp.zeros((N[0], N[1]))
+source_i = source_modif[12]
+v_source = true_model[source_i[0], source_i[1]]
+source_function = []
+for it in range(int(n_steps)):
+    t = it*dt_ben
+    t_source = t
+    a = (jnp.pi**2)*f0*f0
+    source_term = factor * (1 - 2*a*(t_source-t0)**2)*jnp.exp(-a*(t_source-t0)**2)
+    # pressure_future = pressure_future.at[source_i[0], source_i[1]].add(
+    #             dt*dt*(4*jnp.pi*(v_source**2)*source_term))# latest seismicCPML normalisation
+    source_function.append(dt_ben*dt_ben*(4*jnp.pi*(v_source**2)*source_term))
+
+x_lim = -1
+x_axis_ben = jnp.arange(0, len(source_function), 1)*dt_ben
+x_axis_jwave = jnp.arange(0, len(signal), 1)*dt_jwave
+plt.plot(x_axis_ben[:x_lim],source_function[:x_lim], label='source function Ben')
+plt.plot(x_axis_jwave[:x_lim],signal[:x_lim], label='source function j-wave')
+plt.xlabel('Time step')
+plt.ylabel('Amplitude')
+plt.title('Source Function Comparison')
+plt.legend()
+plt.show()
+
+print(326*dt_ben)
+print(326*dt_jwave)
+print(326*dt_jwave / (326*dt_ben))
+
+# %% [markdown]
+# ## Define source wavelet
+
+# %%
+# Time axis
+time_axis = TimeAxis.from_medium(medium, cfl=cfl)
+t = time_axis.to_array()
+dt_jwave = time_axis.dt
+print("dt: ", time_axis.dt)
+print("t: ", t.shape)
+
+source_freq = 200
+source_mag = 1.3e-1
+source_mag = source_mag / time_axis.dt
+
+
+
+# Parameters
+# t_shift = 0.022  # Time shift in seconds
+# t_shift = 0.005
+t_shift = 1.2 / source_freq  # Time shift in seconds
+
+# Generate the Ricker wavelet with time shift
+signal = source_mag * ricker_wavelet(t, source_freq, t_shift)
+src_signal = jnp.stack([signal])
+print(len(signal))
+
+# %% [markdown]
+# ## Plot the setup
+
+# %%
 fig, ax = plt.subplots(1, 2, figsize=(15, 4), gridspec_kw={"width_ratios": [1, 2]})
 
 ax[0].imshow(medium.sound_speed.on_grid, cmap="gray")
@@ -195,101 +290,17 @@ ax[1].set_title("Source signals")
 #ax[1].get_yaxis().set_visible(False)
 
 # %% [markdown]
-# ## Setup for the test case C and FWI loss function
-
-# %% [markdown]
-#
-
-# %%
-fcn_params = {
-    "criterion_threshold": 1e-10,
-    "regularisation_loss": 0.0,
-    "norm_loss": 0.0,
-    "top_k_loss": 0.0,
-    "differentiable_mask_sharpness": 10.0,
-    "number_of_k":10,
-    "hidden_size": 56,
-    "num_hidden_layers": 3,
-    "learning_rate": 1e-3,
-    "num_iterations": 15,
-    "print_gradients": False,
-    "num_sources": num_sources,
-}
-
-# %%
-# Load and format the Jacobians
-
-# jacobians = jnp.load("curvel_jac_model_{}_data_5_5_5.npy".format(model_index))
-# print(jacobians.shape)
-
-# transposed_jacobians = jnp.transpose(jacobians, axes=(1, 2, 0, 3))
-
-# print(transposed_jacobians.shape)
-# stacked_array = jnp.stack([array.reshape(-1, array.shape[-1]) for array in transposed_jacobians])
-# stacked_array.shape
-
-# complex_stack_complete = []
-# for src in stacked_array:
-#     complex_stack = []
-#     for row in src:
-#         real_part = row.reshape(70,140)[:,:70]
-#         imaginary_part = row.reshape(70,140)[:,70:]
-#         complex_stack.append(real_part + 1j * imaginary_part)
-
-#     # Convert to NumPy array if needed
-#     complex_stack = jnp.array(complex_stack)
-
-#     # print(complex_stack.shape)
-
-#     # Flatten all rows into num_rows x 4900 matrix
-#     num_rows = complex_stack.shape[0]
-#     complex_reshaped = np.empty((num_rows, 4900), dtype=np.complex128)
-
-#     for i, complex_matrix in enumerate(complex_stack):
-#         complex_reshaped[i, :] = complex_matrix.flatten()
-    
-#     complex_stack_complete.append(complex_reshaped)
-
-# complex_stack_complete = jnp.array(complex_stack_complete)
-# print(complex_stack_complete.shape)
-
-# complex_stack_complete_2D = jnp.vstack([array for array in complex_stack_complete])
-# print(complex_stack_complete_2D.shape)
-
-
-
-# %%
-# Calculate the eigenvalue criterion for each Jacobian row to serves as input for the network
-
-criterion_threshold = fcn_params["criterion_threshold"]
-
-# C_sources_1e_3 = [] 
-# for array in stacked_array:
-#     C_sources_1e_3.append(eigenvalue_criterion(array, threshold=criterion_threshold))
-
-# C_sources_1e_3 = jnp.array(C_sources_1e_3)
-
-# del stacked_array
+# ## Simulation functions
 
 # %%
 # FWI functions
 
-src_signal = jnp.stack([signal])
-
 @jit
 def single_source_simulation(sound_speed, source_num):
 
-        
-
-    # if isinstance(source_num, int):
     x = lax.dynamic_slice(source_positions[0], (source_num,), (1,))
     y = lax.dynamic_slice(source_positions[1], (source_num,), (1,))
-        # print("x, y","int", x,y)
-
-    # else:
-    #     x = [source_num[0].astype(jnp.int32)]
-    #     y = [source_num[1].astype(jnp.int32)]
-    #     print("x, y","array", x,y)
+    
         
     sources = Sources((x, y), src_signal, dt=time_axis.dt, domain=domain)
 
@@ -302,6 +313,15 @@ def single_source_simulation(sound_speed, source_num):
     )
     return rf_signals[..., 0]
 
+
+
+
+# %%
+def get_sound_speed(params):
+    return params + compose(params)(nn.sigmoid) * mask
+
+
+# %%
 print(type(num_sources//2))
 # print(len(source_trajectories[-1][0]))
 p = single_source_simulation(medium.sound_speed, num_sources // 2)
@@ -311,7 +331,7 @@ p = single_source_simulation(medium.sound_speed, num_sources // 2)
 plt.figure(figsize=(6, 4.5))
 maxval = jnp.amax(jnp.abs(p))
 plt.imshow(
-    p, cmap="RdBu_r", interpolation="nearest", aspect="auto"
+    p, cmap="RdBu_r", interpolation="nearest", aspect="auto",vmin=-maxval/1000, vmax=maxval/1000
 )
 plt.colorbar()
 plt.title("Acoustic traces")
@@ -319,112 +339,82 @@ plt.xlabel("Sensor index")
 plt.ylabel("Time")
 plt.show()
 
-mask = jnp.ones(domain.N)
-
-mask = mask.at[sensors_positions[0], sensors_positions[1]].set(0.0)
-
-
-
-
-def get_sound_speed(params):
-    return params + compose(params)(nn.sigmoid) * mask
-
-
 
 # %%
-# # initial model is the blurred model
-# params = blurred_model
-# # params = homogenous_model
-# # params = medium.sound_speed * 0.1 + 
-# params
+# Simulate the wave propagation for all sources as the True data
 
-# probabilities = jnp.ones(num_sources)
-# # probabilities = jnp.array([0. ,0. ,0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 1., 1., 1., 1., 1.])
+batch_simulations = vmap(single_source_simulation, in_axes=(None, 0))
+p_data = batch_simulations(medium.sound_speed, jnp.arange(num_sources))
+print(p_data.shape)
 
-# def hilbert_transf(signal, noise=0.2):
-#     x = jnp.abs(analytic_signal(signal))
-#     return x
-
-
-# loss_with_grad = value_and_grad(loss_func, argnums=0)
-
-# batch_simulations = vmap(single_source_simulation, in_axes=(None, 0))
-# p_data = batch_simulations(medium.sound_speed, jnp.arange(num_sources))
-# print(f"Size of data [Source idx, Time, Sensor idx]: {p_data.shape}")
-
-# plt.plot(p_data[0, :, 0])
-# plt.plot(p_data[1, :, 1])
-# plt.show()
-
-# def smooth_fun(gradient):
-#     # x = gradient.on_grid[..., 0]
-#     x = gradient
-#     for _ in range(1):
-#         x = smooth(x, 2.0)
-#     return x
-
-# loss, gradient = loss_with_grad(params, source_num=2)
-# gradient = smooth_fun(gradient)
-
-# # Viualize
-# plt.figure(figsize=(8, 6))
-# plt.imshow(gradient, cmap="RdBu_r")
-# plt.title("Smoothed gradient")
-# plt.colorbar()
-# plt.show()
-
-# num_steps = 250
-
-# # Define optimizer
-# init_fun, update_fun, get_params = optimizers.adam(20.0, 0.9, 0.9)
-# opt_state = init_fun(params)
+# %%
+# compare p_data and p_data_ben
+src_idx = 0
+rec_idx = -1
+plt.plot(x_axis_jwave,p_data[src_idx, :, rec_idx]/np.amax(p_data[src_idx, :, rec_idx]), label="j-wave")
+plt.plot(x_axis_ben,p_data_ben[src_idx, :, rec_idx]/np.amax(p_data_ben[src_idx, :, rec_idx]),"-.", label="ben")
+plt.legend()
+plt.title("Comparison of the simulated data")
+plt.show()
 
 
 
-# # Main loop
-# pbar = tqdm(range(num_steps))
-# _, key = random.split(key)
-# batch_size = 10
-# num_devices = 12
+# %% [markdown]
+# ## Setup for the outer (OED) optimizer
 
-# reconstructions = []
-# losshistory = []
+# %%
+fcn_params = {
+    "criterion_threshold": 1e-10,
+    "regularisation_loss": 0.0,
+    "norm_loss": 0.0,
+    "top_k_loss": 0.0,
+    "differentiable_mask_sharpness": 10.0,
+    "number_of_k":10,
+    "hidden_size": 56,
+    "num_hidden_layers": 3,
+    "learning_rate": 2e-2,
+    "num_iterations": 15,
+    "print_gradients": False,
+    "num_sources": num_sources,
+}
 
-# for k in pbar:
-#     _, key = random.split(key)
+# %%
+#  Load the jacobian data
 
-#     lossval, opt_state = update(opt_state, key, k, probabilities)
+jacobians = jnp.load("curvel_jac_model_{}_data_5_5_5.npy".format(model_index))
+print(jacobians.shape)
+transposed_jacobians = jacobians
+print(transposed_jacobians.shape)
 
-#     # Perform update using multiple sources
-#     # lossval, opt_state = update_multi(opt_state, key, k)
+stacked_array = transposed_jacobians.reshape(transposed_jacobians.shape[0], transposed_jacobians.shape[1]* transposed_jacobians.shape[2],transposed_jacobians.shape[3]*transposed_jacobians.shape[4])
+stacked_array.shape
 
-#     # Perform update using multiple sources in parallel
-#     # lossval, opt_state = update_multi_pmap(opt_state, key, k)
-    
+criterion_threshold = fcn_params["criterion_threshold"]
 
-#     ## For logging
-#     new_params = get_params(opt_state)
-#     reconstructions.append(get_sound_speed(new_params))
-#     losshistory.append(lossval)
-#     pbar.set_description("Loss: {}".format(lossval))
+C_sources_1e_3 = [] 
+for array in stacked_array:
+    C_sources_1e_3.append(eigenvalue_criterion(array, threshold=criterion_threshold))
 
+C_sources_1e_3 = jnp.array(C_sources_1e_3)
 
-# true_sos = true_model
-# vmin = np.amin(true_sos)
-# vmax = np.amax(true_sos)
-# # Visualize the final reconstruction
-# reconstructions = jnp.array(reconstructions) 
-# plt.figure(figsize=(8, 6))
-# plt.imshow(reconstructions[-1], cmap="inferno", vmin=vmin, vmax=vmax)
-# plt.colorbar()
-# plt.title("Final reconstruction")
-# plt.show()
+# input for the network
+x = C_sources_1e_3
+x = (x - jnp.min(x)) / (jnp.max(x) - jnp.min(x))
+
+# delete stacked array and jacobians and trnposed jacobians from memeory
+del jacobians
+del transposed_jacobians
+del stacked_array
+
 
 # %%
 # Fully Connected Neural Network
 class FullyConnectedNN(eqx.Module):
     layers: list
-    activations: list
+    # activations: list
+    activations: list = eqx.static_field()
+    # layers: list = eqx.static_field()
+
 
     def __init__(self, input_size, hidden_size, num_hidden_layers, key):
         keys = jax.random.split(key, num_hidden_layers + 1)
@@ -443,54 +433,82 @@ class FullyConnectedNN(eqx.Module):
 def differentiable_mask(probabilities, sharpness=10.0):
     return jax.nn.sigmoid(sharpness * (probabilities - 0.5))
 
-# def top_k_regularization(soft_mask, k=10):
-#     top_k_values = jax.lax.top_k(soft_mask, k)[0]
-#     penalty = jnp.sum(soft_mask) - jnp.sum(top_k_values)
-#     return penalty
+def top_k_regularization(soft_mask, k=10):
+    top_k_values = jax.lax.top_k(soft_mask, k)[0]
+    penalty = jnp.sum(soft_mask) - jnp.sum(top_k_values)
+    return penalty
 
+def smooth_fun(gradient):
+    # x = gradient.on_grid[..., 0]
+    x = gradient
+    for _ in range(1):
+        x = smooth(x)
+    return x
+@jit
 def fwi(probabilities):
-    
-    # _, key = random.split(key)
+    num_steps = 150
+    key = random.PRNGKey(42)
+    _, key = random.split(key)
     # initial model is the blurred model
-    params = blurred_model
-    init_fun, update_fun, get_params = optimizers.adam(20.0, 0.9, 0.9)
-    opt_state = init_fun(params)
+    params_fwi = blurred_model
+    init_fun_fwi, update_fun_fwi, get_params_fwi = optimizers.adam(25.0, 0.9, 0.9)
+    opt_state_fwi = init_fun_fwi(params_fwi)
 
-    print(f"Size of data [Source idx, Time, Sensor idx]: {p_data.shape}")
+    # print(f"Size of data [Source idx, Time, Sensor idx]: {p_data.shape}")
 
-    def loss_func(params, source_num):
-        c0 = get_sound_speed(params)
-        p = single_source_simulation(c0, source_num)
-        data = p_data[source_num]
+    def loss_func_fwi(params_fwi, source_num):
+        # c0 = get_sound_speed(params_fwi)
+        # p = single_source_simulation(params_fwi, source_num)
+        # p, wavefields = acoustic2D_pml(params_fwi, density, source_modif[source_num], f0, dx, dy, dt_ben, n_steps, receiver_is_modif, pml_width=5)
+        # p, wavefields = acoustic2D(params_fwi, density, source_modif[source_num], f0, dx, dy, dt_ben, n_steps, receiver_is_modif)
+        p, wavefields = acoustic2D_pml_minmem(params_fwi, density, source_modif[source_num], f0, dx, dy, dt_ben, n_steps, receiver_is_modif, pml_width=1)
+        # p, wavefields = acoustic2D_pml_4th_minmem(params_fwi, density, source_modif[source_num], f0, dx, dy, dt_ben, n_steps, receiver_is_modif, pml_width=10)
+        data = p_data_ben[source_num]
+        # data *= probabilities[source_num]
         # return jnp.mean(jnp.abs(hilbert_transf(p) -hilbert_transf(data)) ** 2)
         # L2 loss
         return jnp.mean((p - data) ** 2)
 
-    loss_with_grad = value_and_grad(loss_func, argnums=0)
+    loss_with_grad_fwi = value_and_grad(loss_func_fwi, argnums=0)
 
     # Define and compile the update function
-    # @jit
-    def update(opt_state, key, k, probabilities):
-        v = get_params(opt_state)
+    @jit
+    def update_fwi(opt_state, key, k, probabilities):
+        v = get_params_fwi(opt_state)
         src_num = random.choice(key, num_sources)
-        lossval, gradient = loss_with_grad(v, src_num)
-        # gradient = smooth_fun(gradient)
+        lossval, gradient = loss_with_grad_fwi(v, src_num)
+        gradient = smooth_fun(gradient)
         gradient *= probabilities[src_num]
-        return lossval, update_fun(k, gradient, opt_state)
+        return lossval, update_fun_fwi(k, gradient, opt_state)
 
-    for k in range(55):
+    @jit
+    def body(carry, k):
+        opt_state, key = carry
+        _, key = random.split(key)      # throw away first, keep second
+        lossval, opt_state = update_fwi(opt_state, key, k, probabilities)
+        return (opt_state, key), lossval
 
-        lossval, opt_state = update(opt_state, key, k, probabilities)
+    (opt_state_fwi, _), losses = lax.scan(body, (opt_state_fwi, key), jnp.arange(num_steps))
+    new_params = get_params_fwi(opt_state_fwi)
 
-        ## For logging
-        new_params = get_params(opt_state)
-    
-    return new_params, lossval
+    return new_params
 
 
 
-# Differentiable Loss Function
-def differentiable_loss_fn(model, x, criterion_threshold ,sharpness=10.0, mask_penalty=0.1):
+# %%
+# Test the fwi function
+
+iin = fwi(C_sources_1e_3)
+plt.imshow(iin)
+plt.colorbar()
+plt.show()
+# L1 loss
+print(jnp.linalg.norm((iin - jnp.fliplr(true_model)), ord=1))
+
+
+# %%
+# Differentiable Loss Function for the optimizer
+def differentiable_loss_fn(model, x ,sharpness=10.0, mask_penalty=0.1):
     probabilities = model(x)  # Predict probabilities
     soft_mask = differentiable_mask(probabilities, sharpness)  # Generate soft mask
     
@@ -506,42 +524,27 @@ def differentiable_loss_fn(model, x, criterion_threshold ,sharpness=10.0, mask_p
     # top_k_loss = top_k_regularization(soft_mask, k=fcn_params["number_of_k"])
 
     # singular_loss = eigenvalue_criterion(weighted_matrix, threshold=criterion_threshold)
-    inverted_model, lossval = fwi(probabilities)
+    inverted_model = fwi(probabilities)
     
-    fwi_loss = jnp.linalg.norm(inverted_model - true_model, ord=1)
+    fwi_loss = jnp.linalg.norm((inverted_model - true_model), ord=1)
 
     # fwi_loss = lossval
 
+    # logs["models"].append(inverted_model)
 
 
     # return -(singular_loss) + params["regularisation_loss"]*regularization_loss + params["norm_loss"]*norm_loss + params["top_k_loss"]*top_k_loss
     return fwi_loss + fcn_params["regularisation_loss"]*regularization_loss + fcn_params["norm_loss"]*norm_loss 
 
+loss_and_grad_fn = eqx.filter_value_and_grad(differentiable_loss_fn)
 
 
 # %%
-# Example Usage
-key = jax.random.PRNGKey(42)
-input_size = fcn_params["num_sources"]
-hidden_size = fcn_params["hidden_size"]
-num_hidden_layers = fcn_params["num_hidden_layers"]
-model = FullyConnectedNN(input_size, hidden_size, num_hidden_layers, key)
-
-print("Model:", model)
-
-# matrix = jax.random.normal(key, (100, 50))  # Matrix with 100 rows and 50 columns
-# matrix = complex_stack_complete_2D
-# x = jax.random.normal(key, (input_size,))  # Input to the network
-# x = C_sources_1e_3
-x = jnp.ones(input_size)
-# x = (x - jnp.mean(x)) / jnp.std(x)
-# x = (x - jnp.min(x)) / (jnp.max(x) - jnp.min(x))
-
-# %%
-def train_step(model, criterion_threshold, optimizer, opt_state, x, logs):
+# @partial(jit, static_argnums=(1))
+@jit
+def train_step(model, opt_state, x):
     # Compute loss and gradients
-    loss_and_grad_fn = eqx.filter_value_and_grad(differentiable_loss_fn)
-    loss, grads = loss_and_grad_fn(model, x, criterion_threshold=criterion_threshold, sharpness=fcn_params["differentiable_mask_sharpness"], mask_penalty=1.0)
+    loss, grads = loss_and_grad_fn(model, x, sharpness=fcn_params["differentiable_mask_sharpness"], mask_penalty=1.0)
     
     if fcn_params["print_gradients"]:  
         jax.tree_util.tree_map(lambda g: print("Gradient shape:", g.shape, "Gradient values:", g), grads)
@@ -553,34 +556,52 @@ def train_step(model, criterion_threshold, optimizer, opt_state, x, logs):
 
     # Log the network output (predicted probabilities)
     probabilities = model(x)  # Network output
-    logs["probabilities"].append(probabilities)
+    # logs["probabilities"].append(probabilities)
 
     # Log the mask M
     soft_mask = differentiable_mask(probabilities, sharpness=fcn_params["differentiable_mask_sharpness"])  # Differentiable mask
-    logs["masks"].append(soft_mask)
+    # logs["masks"].append(soft_mask)
 
-    return loss, model, opt_state
+    return loss, model, opt_state, probabilities, soft_mask
 
+
+# %% [markdown]
+# ## Trainning loop
 
 # %%
 
 # Initialize the model and optimizer
 key = jax.random.PRNGKey(42)
-model = FullyConnectedNN(input_size, hidden_size, num_hidden_layers, key)
+model = FullyConnectedNN(fcn_params["num_sources"], fcn_params["hidden_size"], fcn_params["num_hidden_layers"], key)
 optimizer = optax.adamw(fcn_params["learning_rate"])  # Adam optimizer
 opt_state = optimizer.init(eqx.filter(model, eqx.is_inexact_array))  # Initialize optimizer state
 initial_predictions = model(x)  # Initial predictions
 
-batch_simulations = vmap(single_source_simulation, in_axes=(None, 0))
-p_data = batch_simulations(medium.sound_speed, jnp.arange(num_sources))
+
 
 # Training loop
 num_steps = fcn_params["num_iterations"]
 losses = []
-logs = {"probabilities": [], "masks": []}
+logs = {"probabilities": [], "masks": [], "models": []}
 for step in range(num_steps):
-    loss, model, opt_state = train_step(model, criterion_threshold, optimizer, opt_state, x, logs)
+    tic = time.time()
+    
+    loss, model, opt_state, probabilities, soft_mask = train_step(model, opt_state, x)
     losses.append(loss)
+    logs["probabilities"].append(probabilities)
+    logs["masks"].append(soft_mask)
+
+
+
+    # inverted_model, lossval = fwi(logs["probabilities"][-1])
+
+    # plt.figure()
+    # plt.imshow(inverted_model)
+    # plt.colorbar()
+    # plt.show()
+    
+    toc = time.time()
+    print("Time taken for step {}: {:.2f} seconds".format(step, toc - tic))
 
     if step % 1 == 0:
         print(f"Step {step}, Loss: {loss}")
@@ -591,6 +612,9 @@ plt.plot(losses)
 plt.xlabel("Step")
 plt.ylabel("Loss")
 plt.show()
+# 2minutes 25 seconds per iteration on macboook for 200 fwi steps
+
+# %%
 
 # %%
 # Print the first few steps for inspection
@@ -606,7 +630,8 @@ plt.figure()
 
 for step in steps_to_plot:
     plt.title(f"Output mask at different steps")
-    plt.plot(logs["masks"][step], label=f"Step {step}")
+    # plt.plot(logs["masks"][step], label=f"Step {step}")
+    plt.plot(logs["probabilities"][step], label=f"Step {step}")
     # plt.colorbar(label="Mask Values")
     plt.xlabel("Mask index")
     plt.ylabel("Probability")
@@ -622,11 +647,33 @@ plt.text(1.05, 0.5, '\n'.join([f"{key}: {value}" for key, value in fcn_params.it
 plt.show()
 
 # %%
+plt.plot(logs["probabilities"][-1],"*-")
+
+# %%
+invt = fwi(logs["probabilities"][-1])
+plt.imshow(invt)
+plt.colorbar()
+plt.show()  
+
+L1_loss = jnp.linalg.norm((invt - true_model), ord=1)
+print(L1_loss)
+
+# %%
 final_mask = logs["masks"][-1]
 best_sources_C = jnp.argsort(final_mask)[-10:]
 print("best source index", best_sources_C)
 
 # %%
+# best source index [ 4 19  1  6  0 20  5 18 22  2]
+
+# %%
 # model = fwi(final_mask)
 
 # %%
+# [11  5 15 17  0  9  8  4 12 13]
+# [11  3 13 17 24  2 14 18 21 19] # model 84
+# [19  9  5  3 13 22 16 24  0 14] model 84 dataloss
+# [19 11  5  3  0  9  8  4 12 13] # model 7 dataloss
+# [ 5 18 15  9 10  4  8 17 12 13] # model 7 modelloss
+# [15  9 17 21 11  7  8  4 13 12] # model 84 modelloss
+# [ 9 23  1 22  6  3 16  2  0 24] # model 84 modelloss probabilties applied to data instead of gradient

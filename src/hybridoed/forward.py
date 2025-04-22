@@ -4,7 +4,7 @@ from jwave.geometry import Domain
 from scipy.special import hankel1
 from jwave.acoustics.time_harmonic import helmholtz_solver
 from jwave.geometry import Domain, Medium
-from jax import jit
+from jax import jit, lax
 
 
 
@@ -236,33 +236,360 @@ def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=5, num_receive
     return src_coords, recv_coords
 
 
+def ricker_wavelet(t, f, t_shift=0.0):
+    """
+    Generate a Ricker wavelet with a time shift.
 
-# def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=20, num_receivers=10): (test case B)
-#     """
-#     Generate a 2D grid of positions for sources and receivers with more sources than receivers,
-#     arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.
+    Parameters:
+        t (array-like): Time axis (e.g., jax.numpy array).
+        f (float): Central frequency of the wavelet.
+        t_shift (float): Time shift for the wavelet (default is 0.0).
 
-#     Parameters:
-#     - N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
-#     - num_sources: int, number of source positions along each axis.
-#     - num_receivers: int, number of receiver positions along each axis.
+    Returns:
+        jax.numpy.ndarray: Ricker wavelet values at the given time points.
+    """
+    t_shifted = t - t_shift  # Apply the time shift
+    pi2 = (jnp.pi ** 2)
+    a = (pi2 * f ** 2) * (t_shifted ** 2)
+    wavelet = (1 - 2 * a) * jnp.exp(-a)
+    
+    return wavelet
 
-#     Returns:
-#     - src_coords: jnp.ndarray, source positions as a 2D array.
-#     - recv_coords: jnp.ndarray, receiver positions as a 2D array.
-#     """
-#     Nx, Ny = N
 
-#     # Generate evenly spaced indices for sources
-#     src_x = jnp.linspace(5, Nx - 5, num_sources, dtype=jnp.float32)
-#     src_y = jnp.linspace(5, Ny - 5, num_sources, dtype=jnp.float32)
+def acoustic2D(velocity,
+               density,
+               source_i,
+               f0,
+               dx, dy, dt,
+               n_steps,
+               receiver_is=None,
+               output_wavefield=True,
+               ):
+    """Simulate seismic waves through a 2D velocity model"""
 
-#     # Compute receiver positions with fewer points
-#     recv_x = jnp.linspace(5 + (Nx - 10) / (2 * num_receivers), Nx - 5 - (Nx - 10) / (2 * num_receivers), num_receivers, dtype=jnp.float32)
-#     recv_y = jnp.linspace(5 + (Ny - 10) / (2 * num_receivers), Ny - 5 - (Ny - 10) / (2 * num_receivers), num_receivers, dtype=jnp.float32)
+    assert density.shape == velocity.shape
+    nx, ny = velocity.shape
 
-#     # Create 2D grid coordinates for sources and receivers
-#     src_coords = jnp.array([[x, y] for x in src_x for y in src_y], dtype=jnp.int32)
-#     recv_coords = jnp.array([[x, y] for x in recv_x for y in recv_y], dtype=jnp.int32)
+    # precompute some arrays
+    pressure_present = jnp.zeros_like(velocity)
+    pressure_past = jnp.zeros_like(velocity)
+    kappa = density*(velocity**2)
+    density_half_x = jnp.pad(0.5 * (density[1:nx,:]+density[:nx-1,:]), [[0,1],[0,0]], mode="edge")
+    density_half_y = jnp.pad(0.5 * (density[:,1:ny]+density[:,:ny-1]), [[0,0],[0,1]], mode="edge")
+    t0 = 1.2 / f0
+    factor = 1e4
+    v_source = velocity[source_i[0], source_i[1]]
 
-#     return src_coords, recv_coords
+    # TODO: add absorbing boundary
+
+    def step(carry, it):
+        pressure_past, pressure_present = carry
+
+        t = it*dt
+
+        # compute the first spatial derivatives divided by density
+        pressure_x = jnp.pad((pressure_present[1:nx,:]-pressure_present[:nx-1,:]) / dx, [[0,1],[0,0]], mode="constant", constant_values=0.)
+        pressure_y = jnp.pad((pressure_present[:,1:ny]-pressure_present[:,:ny-1]) / dy, [[0,0],[0,1]], mode="constant", constant_values=0.)
+        pressure_density_x = pressure_x / density_half_x
+        pressure_density_y = pressure_y / density_half_y
+
+        # compute the second spatial derivatives
+        pressure_xx = jnp.pad((pressure_density_x[1:nx,:]-pressure_density_x[:nx-1,:]) / dx, [[1,0],[0,0]], mode="constant", constant_values=0.)
+        pressure_yy = jnp.pad((pressure_density_y[:,1:ny]-pressure_density_y[:,:ny-1]) / dy, [[0,0],[1,0]], mode="constant", constant_values=0.)
+
+        # advance wavefield
+        pressure_future = - pressure_past \
+                          + 2 * pressure_present \
+                          + dt*dt*(pressure_xx+pressure_yy)*kappa
+
+        # add the source
+        # Ricker source time function (second derivative of a Gaussian)
+        a = (jnp.pi**2)*f0*f0
+        source_term = factor * (1 - 2*a*(t-t0)**2)*jnp.exp(-a*(t-t0)**2)
+        pressure_future = pressure_future.at[source_i[0], source_i[1]].add(
+            dt*dt*(4*jnp.pi*(v_source**2)*source_term))# latest seismicCPML normalisation
+
+        # extract outputs
+        y = []
+        if receiver_is is not None:
+            gather = pressure_future[receiver_is[:,0], receiver_is[:,1]]
+            y.append(gather)
+        if output_wavefield:
+            y.append(pressure_future)
+
+        # move new values to old values (the present becomes the past, the future becomes the present)
+        return (pressure_present, pressure_future), y
+
+    _, y = lax.scan(step, (pressure_past, pressure_present), jnp.arange(n_steps))
+
+    return y
+
+def acoustic2D_pml(velocity,
+                   density,
+                   source_i,
+                   f0,
+                   dx, dy, dt,
+                   n_steps,
+                   receiver_is=None,
+                   output_wavefield=True,
+                   pml_width=20,
+                   R_coeff=1e-3):
+    """2D acoustic FD with a simple PML/sponge absorbing boundary,
+       and the Ricker source scaled per seismicCPML normalization."""
+    nx, ny = velocity.shape
+    assert density.shape == velocity.shape
+
+    # time levels
+    pressure_past    = jnp.zeros_like(velocity)
+    pressure_present = jnp.zeros_like(velocity)
+
+    # bulk modulus and half-cell densities
+    kappa      = density * (velocity**2)
+    rho_x_half = jnp.pad(0.5*(density[1:,:] + density[:-1,:]), [[0,1],[0,0]], mode="edge")
+    rho_y_half = jnp.pad(0.5*(density[:,1:] + density[:,:-1]), [[0,0],[0,1]], mode="edge")
+
+    # Ricker source parameters
+    t0     = 1.2 / f0
+    factor = 1e3
+    v_source = velocity[source_i[0], source_i[1]]
+    # print(f"v_source: {v_source}")
+
+    # build PML damping profile
+    sigma_max = -(3.0 * velocity.max() * jnp.log(R_coeff)) / (2.0 * pml_width * dx)
+    def make_sigma(n, npml):
+        i = jnp.arange(n)
+        left  = jnp.where(i < npml,       (npml - i) / npml, 0.0)
+        right = jnp.where(i >= n - npml, (i - (n-npml-1)) / npml, 0.0)
+        return sigma_max * (left**2 + right**2)
+    σx = make_sigma(nx, pml_width)
+    σy = make_sigma(ny, pml_width)
+    sigma2d = jnp.add.outer(σx, σy)
+
+    def step(carry, it):
+        p_nm1, p_n = carry
+        t = it * dt
+
+        # spatial gradients -> laplacian
+        dp_dx = jnp.pad((p_n[1:,:] - p_n[:-1,:]) / dx, [[0,1],[0,0]], 'constant')
+        dp_dy = jnp.pad((p_n[:,1:] - p_n[:,:-1]) / dy, [[0,0],[0,1]], 'constant')
+        dp_dx /= rho_x_half
+        dp_dy /= rho_y_half
+        d2p_dx2 = jnp.pad((dp_dx[1:,:] - dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'constant')
+        d2p_dy2 = jnp.pad((dp_dy[:,1:] - dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'constant')
+
+        # Ricker source term
+        t_source = t
+        a = (jnp.pi**2) * f0**2
+        ricker = factor * (1 - 2*a*(t_source - t0)**2) * jnp.exp(-a*(t_source - t0)**2)
+
+        # PML damping coefficient beta
+        β = sigma2d * dt / 2.0
+
+        # finite-difference update with damping
+        lap = dt*dt * (d2p_dx2 + d2p_dy2) * kappa
+        p_np1 = (lap + 2*p_n - (1 - β)*p_nm1) / (1 + β)
+
+        # inject scaled source per seismicCPML
+        source_term = dt*dt * (4*jnp.pi*(v_source**2) * ricker)
+        p_np1 = p_np1.at[source_i[0], source_i[1]].add(source_term)
+
+        # collect outputs
+        out = []
+        if receiver_is is not None:
+            out.append(p_np1[receiver_is[:,0], receiver_is[:,1]])
+        if output_wavefield:
+            out.append(p_np1)
+
+        return (p_n, p_np1), out
+
+    (_, _), ys = lax.scan(step,
+                          (pressure_past, pressure_present),
+                          jnp.arange(n_steps))
+    return ys
+
+
+def acoustic2D_pml_minmem(velocity,
+                         density,
+                         source_i,
+                         f0,
+                         dx, dy, dt,
+                         n_steps,
+                         receiver_is=None,
+                         output_wavefield=True,
+                         pml_width=20,
+                         R_coeff=1e-3):
+    """
+    Memory‐optimized 2D acoustic FD with PML absorbing boundary.
+
+    This version stores only two time‐levels and uses 1D PML profiles,
+    avoiding a full 2D sigma array. It also allows dropping the wavefield
+    output to save memory if only receiver traces are needed.
+    """
+    nx, ny = velocity.shape
+    assert density.shape == velocity.shape
+
+    # Allocate only two full‐grid wavefields
+    p_nm1 = jnp.zeros((nx, ny), dtype=jnp.float32)
+    p_n   = jnp.zeros((nx, ny), dtype=jnp.float32)
+
+    # Bulk modulus and half‐cell densities (float32)
+    kappa      = (density * velocity**2).astype(jnp.float32)
+    rho_x_half = jnp.pad(0.5*(density[1:,:] + density[:-1,:]), [[0,1],[0,0]], mode="edge").astype(jnp.float32)
+    rho_y_half = jnp.pad(0.5*(density[:,1:] + density[:,:-1]), [[0,0],[0,1]], mode="edge").astype(jnp.float32)
+
+    # Precompute constants
+    t0      = (jnp.array(1.2) / f0).astype(jnp.float32)
+    factor  = jnp.array(1e4, dtype=jnp.float32)
+    v_src   = jnp.array(velocity[source_i[0], source_i[1]], dtype=jnp.float32)
+    a_const = jnp.array(jnp.pi**2 * f0**2).astype(jnp.float32)
+    dt2     = jnp.array(dt * dt).astype(jnp.float32)
+
+    # Build 1D PML damping profiles (no 2D array)
+    sigma_max = -(3.0 * velocity.max() * jnp.log(R_coeff)) / (2.0 * pml_width * dx)
+    i = jnp.arange(nx, dtype=jnp.float32)
+    j = jnp.arange(ny, dtype=jnp.float32)
+    # Quadratic ramp on edges
+    ramp_x = jnp.where(i < pml_width, (pml_width - i) / pml_width, 0.0)
+    ramp_x = jnp.where(i >= nx - pml_width, (i - (nx - pml_width - 1)) / pml_width, ramp_x)
+    ramp_y = jnp.where(j < pml_width, (pml_width - j) / pml_width, 0.0)
+    ramp_y = jnp.where(j >= ny - pml_width, (j - (ny - pml_width - 1)) / pml_width, ramp_y)
+    beta_x = (sigma_max * ramp_x**2 * dt / 2.0).astype(jnp.float32)  # shape (nx,)
+    beta_y = (sigma_max * ramp_y**2 * dt / 2.0).astype(jnp.float32)  # shape (ny,)
+
+    def step(carry, it):
+        p_prev, p_curr = carry
+        t = it * dt
+
+        # Spatial gradients -> laplacian
+        dp_dx = jnp.pad((p_curr[1:,:] - p_curr[:-1,:]) / dx, [[0,1],[0,0]], 'constant') / rho_x_half
+        dp_dy = jnp.pad((p_curr[:,1:] - p_curr[:,:-1]) / dy, [[0,0],[0,1]], 'constant') / rho_y_half
+        lap   = dt2 * (jnp.pad((dp_dx[1:,:]-dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'constant')
+                     + jnp.pad((dp_dy[:,1:]-dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'constant')) * kappa
+
+        # Ricker source
+        ricker = factor * (1 - 2*a_const*(t - t0)**2) * jnp.exp(-a_const*(t - t0)**2)
+        src_term = dt2 * (4*jnp.pi*(v_src**2)) * ricker
+
+        # Broadcasted damping: beta_x[:,None] + beta_y[None,:]
+        β_sum = beta_x[:, None] + beta_y[None, :]
+
+        # Update with damping
+        p_next = (lap + 2*p_curr - (1 - β_sum) * p_prev) / (1 + β_sum)
+        p_next = p_next.at[source_i[0], source_i[1]].add(src_term)
+
+        # Outputs
+        out = []
+        if receiver_is is not None:
+            out.append(p_next[receiver_is[:,0], receiver_is[:,1]])
+        if output_wavefield:
+            out.append(p_next)
+
+        return (p_curr, p_next), out
+
+    (_, _), ys = lax.scan(step, (p_nm1, p_n), jnp.arange(n_steps))
+    return ys
+
+def acoustic2D_pml_4th_minmem(velocity,
+                             density,
+                             source_i,
+                             f0,
+                             dx, dy, dt,
+                             n_steps,
+                             receiver_is=None,
+                             output_wavefield=True,
+                             pml_width=20,
+                             R_coeff=1e-3):
+    """
+    4th-order accurate, memory-optimized 2D acoustic FD with boundary-only PML.
+
+    - Uses a 5-point stencil for ∂²/∂x² and ∂²/∂y² (4th-order) to allow coarser grid.
+    - Stores only two time-levels.
+    - PML damping β defined only on a width-pml boundary via 1D profiles and masked application.
+    """
+    nx, ny = velocity.shape
+    assert density.shape == (nx, ny)
+
+    # Allocate two levels only, float32
+    p_nm1 = jnp.zeros((nx, ny), jnp.float32)
+    p_n   = jnp.zeros((nx, ny), jnp.float32)
+
+    # Material properties in float32
+    kappa = (density * velocity**2).astype(jnp.float32)
+
+    # Precompute Ricker source constants
+    t0      = jnp.array(1.2/f0, jnp.float32)
+    factor  = jnp.array(1, jnp.float32)
+    v_src   = jnp.array(velocity[source_i[0], source_i[1]], jnp.float32)
+    a_const = jnp.array(jnp.pi**2 * f0**2).astype(jnp.float32)
+    dt2     = jnp.array(dt*dt).astype(jnp.float32)
+
+    # Build 1D PML damping β profiles (float32)
+    sigma_max = -(3.0 * velocity.max() * jnp.log(R_coeff))
+    sigma_max /= (2.0 * pml_width * dx)
+    i = jnp.arange(nx, dtype=jnp.float32)
+    j = jnp.arange(ny, dtype=jnp.float32)
+    # quadratic ramps
+    ramp_x = jnp.where(i < pml_width, (pml_width - i)/pml_width, 0.0)
+    ramp_x = jnp.where(i >= nx-pml_width, (i-(nx-pml_width-1))/pml_width, ramp_x)
+    ramp_y = jnp.where(j < pml_width, (pml_width - j)/pml_width, 0.0)
+    ramp_y = jnp.where(j >= ny-pml_width, (j-(ny-pml_width-1))/pml_width, ramp_y)
+    beta_x = (sigma_max * ramp_x**2 * dt/2.0).astype(jnp.float32)  # (nx,)
+    beta_y = (sigma_max * ramp_y**2 * dt/2.0).astype(jnp.float32)  # (ny,)
+
+    # Masks: 1 inside boundary region, 0 elsewhere
+    mask_x = jnp.zeros(nx, jnp.float32)
+    mask_x = mask_x.at[:pml_width].set(1.0)
+    mask_x = mask_x.at[-pml_width:].set(1.0)
+    mask_y = jnp.zeros(ny, jnp.float32)
+    mask_y = mask_y.at[:pml_width].set(1.0)
+    mask_y = mask_y.at[-pml_width:].set(1.0)
+
+    def step(carry, it):
+        p_prev, p_curr = carry
+        t = it * dt
+
+        # 4th-order in x: pad then stencil
+        pad_x = jnp.pad(p_curr, ((2,2),(0,0)), mode='edge')  # shape (nx+4, ny)
+        d2p_dx2 = (
+            -1/12 * pad_x[:-4, :] + 4/3 * pad_x[1:-3, :]  
+            -5/2 * pad_x[2:-2, :] + 4/3 * pad_x[3:-1, :]  
+            -1/12 * pad_x[4:, :]
+        ) / dx**2  # shape (nx, ny)
+
+        # 4th-order in y
+        pad_y = jnp.pad(p_curr, ((0,0),(2,2)), mode='edge')  # shape (nx, ny+4)
+        d2p_dy2 = (
+            -1/12 * pad_y[:, :-4] + 4/3 * pad_y[:, 1:-3]  
+            -5/2 * pad_y[:, 2:-2] + 4/3 * pad_y[:, 3:-1]  
+            -1/12 * pad_y[:, 4:]
+        ) / dy**2  # shape (nx, ny)
+
+        # Combined laplacian
+        lap = dt2 * (d2p_dx2 + d2p_dy2) * kappa
+
+        # Ricker source
+        ricker = factor * (1 - 2*a_const*(t - t0)**2)
+        ricker *= jnp.exp(-a_const*(t - t0)**2)
+        src   = dt2 * (4*jnp.pi*(v_src**2)) * ricker
+
+        # PML damping mask and sum
+        beta_sum = beta_x[:,None] + beta_y[None,:]  # (nx,ny)
+        mask2d   = mask_x[:,None] * mask_y[None,:]  # (nx,ny)
+        β_mask   = beta_sum * mask2d
+
+        # Time update with damping
+        p_next = (lap + 2*p_curr - (1 - β_mask)*p_prev) / (1 + β_mask)
+        p_next = p_next.at[source_i[0], source_i[1]].add(src)
+
+        # outputs
+        out = []
+        if receiver_is is not None:
+            out.append(p_next[receiver_is[:,0], receiver_is[:,1]])
+        if output_wavefield:
+            out.append(p_next)
+
+        return (p_curr, p_next), out
+
+    # Run the time loop
+    (_, _), ys = lax.scan(step, (p_nm1, p_n), jnp.arange(n_steps))
+    return ys
