@@ -328,16 +328,33 @@ four nearest grid points.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hybridoed.forward.generate_2D_gridded_src_rec_positions">
-<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_2D_gridded_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(70,</span> <span class="pre">70)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_receivers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_2D_gridded_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions" title="Link to this definition">¶</a></dt>
-<dd><p>Generate a 2D grid of positions for sources and receivers with more sources than receivers,
-arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.</p>
-<p>Parameters:
-- N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
-- num_sources: int, number of source positions along each axis.
-- num_receivers: int, number of receiver positions along each axis.</p>
-<p>Returns:
-- src_coords: jnp.ndarray, source positions as a 2D array.
-- recv_coords: jnp.ndarray, receiver positions as a 2D array.</p>
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_2D_gridded_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(70,</span> <span class="pre">70)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_receivers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_2D_gridded_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions" title="Link to this definition">¶</a></dt>
+<dd><p>Sources ∈ [margin,   Nx-1-margin]×[margin,   Ny-1-margin]
+Receivers ∈ [dx/2, (Nx-1)-dx/2]×[dy/2, (Ny-1)-dy/2]</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.forward.generate_src_rec_positions">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Array</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Array</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_src_rec_positions" title="Link to this definition">¶</a></dt>
+<dd><p>Given explicit source‐grid and receiver‐grid coords, return flattened
+(N,2) arrays of (i,j) positions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>src_x</strong> (<em>sequences</em><em> of </em><em>floats</em>) – 1D arrays of X‐ and Y‐coordinates for sources.</p></li>
+<li><p><strong>src_y</strong> (<em>sequences</em><em> of </em><em>floats</em>) – 1D arrays of X‐ and Y‐coordinates for sources.</p></li>
+<li><p><strong>rec_x</strong> (<em>sequences</em><em> of </em><em>floats</em>) – 1D arrays of X‐ and Y‐coordinates for receivers.</p></li>
+<li><p><strong>rec_y</strong> (<em>sequences</em><em> of </em><em>floats</em>) – 1D arrays of X‐ and Y‐coordinates for receivers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>src_coords, recv_coords</strong> (<em>jnp.ndarray, shape (len(src_x)*len(src_y), 2), dtype float32</em>) – Source positions as [[x0,y0], [x1,y0], …] in mesh order.</p></li>
+<li><p><em>recv_coords, same shape logic for receivers.</em></p></li>
+</ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -509,6 +526,7 @@ and solves the Helmholtz equation using a specified solver.</p>
 <li><a class="reference internal" href="#hybridoed.forward.acoustic2D_pml_minmem"><code class="docutils literal notranslate"><span class="pre">acoustic2D_pml_minmem()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.create_src_field"><code class="docutils literal notranslate"><span class="pre">create_src_field()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions"><code class="docutils literal notranslate"><span class="pre">generate_2D_gridded_src_rec_positions()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.forward.generate_src_rec_positions"><code class="docutils literal notranslate"><span class="pre">generate_src_rec_positions()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.get_analytical_greens_function"><code class="docutils literal notranslate"><span class="pre">get_analytical_greens_function()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.ricker_wavelet"><code class="docutils literal notranslate"><span class="pre">ricker_wavelet()</span></code></a></li>
 <li><a class="reference internal" href="#hybridoed.forward.solve_helmholtz_general"><code class="docutils literal notranslate"><span class="pre">solve_helmholtz_general()</span></code></a></li>
