@@ -5,6 +5,7 @@ from scipy.special import hankel1
 from jwave.acoustics.time_harmonic import helmholtz_solver
 from jwave.geometry import Domain, Medium
 from jax import jit, lax
+from typing import Sequence, Tuple
 
 
 
@@ -205,36 +206,90 @@ def get_analytical_greens_function(L_x, L_y, acoustic_velocity, x_source, y_sour
     G = A * hankel1(0, K * R)
     return G
 
-def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=5, num_receivers=5):
+def generate_2D_gridded_src_rec_positions(
+    N=(70, 70),
+    num_sources=5,
+    num_receivers=5,
+    margin=5.0
+):
     """
-    Generate a 2D grid of positions for sources and receivers with more sources than receivers,
-    arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.
-
-    Parameters:
-    - N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
-    - num_sources: int, number of source positions along each axis.
-    - num_receivers: int, number of receiver positions along each axis.
-
-    Returns:
-    - src_coords: jnp.ndarray, source positions as a 2D array.
-    - recv_coords: jnp.ndarray, receiver positions as a 2D array.
+    Sources ∈ [margin,   Nx-1-margin]×[margin,   Ny-1-margin]
+    Receivers ∈ [dx/2, (Nx-1)-dx/2]×[dy/2, (Ny-1)-dy/2]
     """
     Nx, Ny = N
 
-    # Generate evenly spaced indices for sources
-    src_x = jnp.linspace(5, Nx - 5, num_sources, dtype=jnp.float32)
-    src_y = jnp.linspace(5, Ny - 5, num_sources, dtype=jnp.float32)
+    # 1) source positions (unchanged)
+    if num_sources > 1:
+        src_x = jnp.linspace(margin,   Nx-1-margin,   num_sources, dtype=jnp.float32)
+        src_y = jnp.linspace(margin,   Ny-1-margin,   num_sources, dtype=jnp.float32)
+    else:
+        cx = 0.5*((margin) + (Nx-1-margin))
+        cy = 0.5*((margin) + (Ny-1-margin))
+        src_x = jnp.array([cx], dtype=jnp.float32)
+        src_y = jnp.array([cy], dtype=jnp.float32)
 
-    # Compute receiver positions with fewer points
-    recv_x = jnp.linspace(5 + (src_x[1] - src_x[0]) / 2 + 0.1, Nx - 5 - (src_x[1] - src_x[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
-    recv_y = jnp.linspace(5 + (src_y[1] - src_y[0]) / 2 + 0.1, Ny - 5 - (src_y[1] - src_y[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
+    # 2) receiver positions (full coverage minus half‐cell)
+    if num_receivers > 1:
+        # raw grid from 0 to Nx-1
+        raw_rx = jnp.linspace(0.0, Nx-1.0, num_receivers, dtype=jnp.float32)
+        raw_ry = jnp.linspace(0.0, Ny-1.0, num_receivers, dtype=jnp.float32)
+        dx = raw_rx[1] - raw_rx[0]
+        dy = raw_ry[1] - raw_ry[0]
+        off_x = dx/2.0
+        off_y = dy/2.0
 
-    # Create 2D grid coordinates for sources and receivers
-    src_coords = jnp.array([[x + 0.1, y + 0.1] for x in src_x for y in src_y], dtype=jnp.int32)
-    recv_coords = jnp.array([[x + 0.1, y + 0.1] for x in recv_x for y in recv_y], dtype=jnp.int32)
+        # shift by half‐spacing, then clamp in [0, Nx-1] so edges sit at ±½ cell
+        recv_x = jnp.clip(raw_rx + off_x, 0.0, Nx-1.0)
+        recv_y = jnp.clip(raw_ry + off_y, 0.0, Ny-1.0)
+    else:
+        cx = 0.5*((0.0+dx/2) + ((Nx-1.0)-dx/2))
+        cy = 0.5*((0.0+dy/2) + ((Ny-1.0)-dy/2))
+        recv_x = jnp.array([cx], dtype=jnp.float32)
+        recv_y = jnp.array([cy], dtype=jnp.float32)
+
+    # 3) mesh + flatten
+    sx, sy = jnp.meshgrid(src_x,  src_y,  indexing='xy')
+    rx, ry = jnp.meshgrid(recv_x, recv_y, indexing='xy')
+
+    src_coords  = jnp.stack([sx.ravel(),  sy.ravel()],  axis=-1, dtype=jnp.float32)
+    recv_coords = jnp.stack([rx.ravel(),  ry.ravel()], axis=-1, dtype=jnp.float32)
 
     return src_coords, recv_coords
 
+def generate_src_rec_positions(
+    src_x: Sequence[float],
+    src_y: Sequence[float],
+    rec_x: Sequence[float],
+    rec_y: Sequence[float],
+) -> Tuple[jnp.ndarray, jnp.ndarray]:
+    """
+    Given explicit source‐grid and receiver‐grid coords, return flattened
+    (N,2) arrays of (i,j) positions.
+
+    Parameters
+    ----------
+    src_x, src_y : sequences of floats
+        1D arrays of X‐ and Y‐coordinates for sources.
+    rec_x, rec_y : sequences of floats
+        1D arrays of X‐ and Y‐coordinates for receivers.
+
+    Returns
+    -------
+    src_coords, recv_coords : jnp.ndarray, shape (len(src_x)*len(src_y), 2), dtype float32
+        Source positions as [[x0,y0], [x1,y0], …] in mesh order.
+    recv_coords, same shape logic for receivers.
+    """
+    sx, sy = jnp.meshgrid(jnp.array(src_x, dtype=jnp.float32),
+                          jnp.array(src_y, dtype=jnp.float32),
+                          indexing="xy")
+    rx, ry = jnp.meshgrid(jnp.array(rec_x, dtype=jnp.float32),
+                          jnp.array(rec_y, dtype=jnp.float32),
+                          indexing="xy")
+
+    src_coords  = jnp.stack([sx.ravel(),  sy.ravel()],  axis=-1)
+    recv_coords = jnp.stack([rx.ravel(),  ry.ravel()], axis=-1)
+
+    return src_coords, recv_coords
 
 def ricker_wavelet(t, f, t_shift=0.0):
     """
@@ -440,7 +495,33 @@ def acoustic2D_pml_minmem(velocity,
     # Precompute constants
     t0      = (jnp.array(1.2) / f0).astype(jnp.float32)
     factor  = jnp.array(1e4, dtype=jnp.float32)
-    v_src   = jnp.array(velocity[source_i[0], source_i[1]], dtype=jnp.float32)
+    # v_src   = jnp.array(velocity[source_i[0], source_i[1]], dtype=jnp.float32)
+    # compute floor‐indices (clamped so i0+1, j0+1 stay in bounds)
+    sx_f, sy_f = source_i            # now floats
+    i0 = jnp.clip(jnp.floor(sx_f).astype(jnp.int32), 0, nx-2)
+    j0 = jnp.clip(jnp.floor(sy_f).astype(jnp.int32), 0, ny-2)
+    di = sx_f - i0
+    dj = sy_f - j0
+
+    # fetch the four corner values of velocity
+    v00 = velocity[i0,   j0  ]
+    v10 = velocity[i0+1, j0  ]
+    v01 = velocity[i0,   j0+1]
+    v11 = velocity[i0+1, j0+1]
+
+    # bilinear weights
+    w00 = (1 - di)*(1 - dj)
+    w10 = di      *(1 - dj)
+    w01 = (1 - di)*dj
+    w11 = di      *dj
+
+    # now interpolated velocity at (sx_f,sy_f)
+    v_src = (w00 * v00 +
+            w10 * v10 +
+            w01 * v01 +
+            w11 * v11).astype(jnp.float32)
+
+
     a_const = jnp.array(jnp.pi**2 * f0**2).astype(jnp.float32)
     dt2     = jnp.array(dt * dt).astype(jnp.float32)
 
@@ -460,27 +541,75 @@ def acoustic2D_pml_minmem(velocity,
         p_prev, p_curr = carry
         t = it * dt
 
-        # Spatial gradients -> laplacian
-        dp_dx = jnp.pad((p_curr[1:,:] - p_curr[:-1,:]) / dx, [[0,1],[0,0]], 'constant') / rho_x_half
-        dp_dy = jnp.pad((p_curr[:,1:] - p_curr[:,:-1]) / dy, [[0,0],[0,1]], 'constant') / rho_y_half
-        lap   = dt2 * (jnp.pad((dp_dx[1:,:]-dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'constant')
-                     + jnp.pad((dp_dy[:,1:]-dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'constant')) * kappa
+        # --- 1) compute the “nominal” FD update (no source) ---
+        # spatial gradients
+        dp_dx = jnp.pad((p_curr[1:,:] - p_curr[:-1,:]) / dx,
+                        [[0,1],[0,0]], 'constant') / rho_x_half
+        dp_dy = jnp.pad((p_curr[:,1:] - p_curr[:,:-1]) / dy,
+                        [[0,0],[0,1]], 'constant') / rho_y_half
 
-        # Ricker source
-        ricker = factor * (1 - 2*a_const*(t - t0)**2) * jnp.exp(-a_const*(t - t0)**2)
-        src_term = dt2 * (4*jnp.pi*(v_src**2)) * ricker
+        lap = dt2 * (
+            jnp.pad((dp_dx[1:,:] - dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'constant')
+        + jnp.pad((dp_dy[:,1:] - dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'constant')
+        ) * kappa
 
-        # Broadcasted damping: beta_x[:,None] + beta_y[None,:]
         β_sum = beta_x[:, None] + beta_y[None, :]
 
-        # Update with damping
-        p_next = (lap + 2*p_curr - (1 - β_sum) * p_prev) / (1 + β_sum)
-        p_next = p_next.at[source_i[0], source_i[1]].add(src_term)
+        p_nominal = (lap + 2*p_curr - (1 - β_sum)*p_prev) / (1 + β_sum)
 
-        # Outputs
+        # --- 2) build the Ricker source injection term ---
+        ricker = factor * (1 - 2*a_const*(t - t0)**2) * jnp.exp(-a_const*(t - t0)**2)
+        src_term = dt2 * (4*jnp.pi*(v_src**2)) * ricker   # scalar
+
+        # --- 3) bilinear‐inject at FLOAT location (sx_f, sy_f) ---
+        sx_f, sy_f = source_i        # now floats
+        # floor‐indices, then clip to [0, nx-2]×[0, ny-2]
+        i0 = jnp.clip(jnp.floor(sx_f).astype(jnp.int32), 0, nx-2)
+        j0 = jnp.clip(jnp.floor(sy_f).astype(jnp.int32), 0, ny-2)
+        di = sx_f - i0
+        dj = sy_f - j0
+
+        w00 = (1 - di)*(1 - dj)
+        w10 = di      *(1 - dj)
+        w01 = (1 - di)*dj
+        w11 = di      *dj
+
+        # start from the nominal update
+        p_next = p_nominal
+        # scatter‐add each corner
+        p_next = p_next.at[i0,   j0  ].add(w00 * src_term)
+        p_next = p_next.at[i0+1, j0  ].add(w10 * src_term)
+        p_next = p_next.at[i0,   j0+1].add(w01 * src_term)
+        p_next = p_next.at[i0+1, j0+1].add(w11 * src_term)
+
+        # --- 4) gather outputs ---
+        # unpack float positions
+        sx_rec = receiver_is[:, 0]   # shape (Nrec,)
+        sy_rec = receiver_is[:, 1]   # shape (Nrec,)
+
+        # compute integer “corners” and fractional offsets
+        i0r = jnp.clip(jnp.floor(sx_rec).astype(jnp.int32), 0, nx-2)
+        j0r = jnp.clip(jnp.floor(sy_rec).astype(jnp.int32), 0, ny-2)
+        di  = sx_rec - i0r
+        dj  = sy_rec - j0r
+
+        # corner values
+        v00 = p_next[i0r,   j0r  ]  # shape (Nrec,)
+        v10 = p_next[i0r+1, j0r  ]
+        v01 = p_next[i0r,   j0r+1]
+        v11 = p_next[i0r+1, j0r+1]
+
+        # bilinear weights
+        w00 = (1-di)*(1-dj)
+        w10 = di     *(1-dj)
+        w01 = (1-di)*dj
+        w11 = di     *dj
+
+        # interpolated receiver traces
+        rec_vals = w00*v00 + w10*v10 + w01*v01 + w11*v11  # shape (Nrec,)
+
         out = []
-        if receiver_is is not None:
-            out.append(p_next[receiver_is[:,0], receiver_is[:,1]])
+        out.append(rec_vals)
         if output_wavefield:
             out.append(p_next)
 
