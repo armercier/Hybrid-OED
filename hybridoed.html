@@ -328,9 +328,16 @@ four nearest grid points.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="hybridoed.forward.generate_2D_gridded_src_rec_positions">
-<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_2D_gridded_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(70,</span> <span class="pre">70)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_receivers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_2D_gridded_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions" title="Link to this definition">¶</a></dt>
-<dd><p>Sources ∈ [margin,   Nx-1-margin]×[margin,   Ny-1-margin]
-Receivers ∈ [dx/2, (Nx-1)-dx/2]×[dy/2, (Ny-1)-dy/2]</p>
+<span class="sig-prename descclassname"><span class="pre">hybridoed.forward.</span></span><span class="sig-name descname"><span class="pre">generate_2D_gridded_src_rec_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(70,</span> <span class="pre">70)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_sources</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_receivers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/forward.html#generate_2D_gridded_src_rec_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.forward.generate_2D_gridded_src_rec_positions" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a 2D grid of positions for sources and receivers with more sources than receivers,
+arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.</p>
+<p>Parameters:
+- N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
+- num_sources: int, number of source positions along each axis.
+- num_receivers: int, number of receiver positions along each axis.</p>
+<p>Returns:
+- src_coords: jnp.ndarray, source positions as a 2D array.
+- recv_coords: jnp.ndarray, receiver positions as a 2D array.</p>
 </dd></dl>
 
 <dl class="py function">
