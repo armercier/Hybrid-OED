@@ -206,53 +206,33 @@ def get_analytical_greens_function(L_x, L_y, acoustic_velocity, x_source, y_sour
     G = A * hankel1(0, K * R)
     return G
 
-def generate_2D_gridded_src_rec_positions(
-    N=(70, 70),
-    num_sources=5,
-    num_receivers=5,
-    margin=5.0
-):
+def generate_2D_gridded_src_rec_positions(N=(70, 70), num_sources=5, num_receivers=5):
     """
-    Sources ∈ [margin,   Nx-1-margin]×[margin,   Ny-1-margin]
-    Receivers ∈ [dx/2, (Nx-1)-dx/2]×[dy/2, (Ny-1)-dy/2]
+    Generate a 2D grid of positions for sources and receivers with more sources than receivers,
+    arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.
+
+    Parameters:
+    - N: Tuple[int, int], dimensions of the 2D grid (Nx, Ny).
+    - num_sources: int, number of source positions along each axis.
+    - num_receivers: int, number of receiver positions along each axis.
+
+    Returns:
+    - src_coords: jnp.ndarray, source positions as a 2D array.
+    - recv_coords: jnp.ndarray, receiver positions as a 2D array.
     """
     Nx, Ny = N
 
-    # 1) source positions (unchanged)
-    if num_sources > 1:
-        src_x = jnp.linspace(margin,   Nx-1-margin,   num_sources, dtype=jnp.float32)
-        src_y = jnp.linspace(margin,   Ny-1-margin,   num_sources, dtype=jnp.float32)
-    else:
-        cx = 0.5*((margin) + (Nx-1-margin))
-        cy = 0.5*((margin) + (Ny-1-margin))
-        src_x = jnp.array([cx], dtype=jnp.float32)
-        src_y = jnp.array([cy], dtype=jnp.float32)
+    # Generate evenly spaced indices for sources
+    src_x = jnp.linspace(5, Nx - 5, num_sources, dtype=jnp.float32)
+    src_y = jnp.linspace(5, Ny - 5, num_sources, dtype=jnp.float32)
 
-    # 2) receiver positions (full coverage minus half‐cell)
-    if num_receivers > 1:
-        # raw grid from 0 to Nx-1
-        raw_rx = jnp.linspace(0.0, Nx-1.0, num_receivers, dtype=jnp.float32)
-        raw_ry = jnp.linspace(0.0, Ny-1.0, num_receivers, dtype=jnp.float32)
-        dx = raw_rx[1] - raw_rx[0]
-        dy = raw_ry[1] - raw_ry[0]
-        off_x = dx/2.0
-        off_y = dy/2.0
+    # Compute receiver positions with fewer points
+    recv_x = jnp.linspace(5 + (src_x[1] - src_x[0]) / 2 + 0.1, Nx - 5 - (src_x[1] - src_x[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
+    recv_y = jnp.linspace(5 + (src_y[1] - src_y[0]) / 2 + 0.1, Ny - 5 - (src_y[1] - src_y[0]) / 2 + 0.1, num_receivers, dtype=jnp.float32)
 
-        # shift by half‐spacing, then clamp in [0, Nx-1] so edges sit at ±½ cell
-        recv_x = jnp.clip(raw_rx + off_x, 0.0, Nx-1.0)
-        recv_y = jnp.clip(raw_ry + off_y, 0.0, Ny-1.0)
-    else:
-        cx = 0.5*((0.0+dx/2) + ((Nx-1.0)-dx/2))
-        cy = 0.5*((0.0+dy/2) + ((Ny-1.0)-dy/2))
-        recv_x = jnp.array([cx], dtype=jnp.float32)
-        recv_y = jnp.array([cy], dtype=jnp.float32)
-
-    # 3) mesh + flatten
-    sx, sy = jnp.meshgrid(src_x,  src_y,  indexing='xy')
-    rx, ry = jnp.meshgrid(recv_x, recv_y, indexing='xy')
-
-    src_coords  = jnp.stack([sx.ravel(),  sy.ravel()],  axis=-1, dtype=jnp.float32)
-    recv_coords = jnp.stack([rx.ravel(),  ry.ravel()], axis=-1, dtype=jnp.float32)
+    # Create 2D grid coordinates for sources and receivers
+    src_coords = jnp.array([[x + 0.1, y + 0.1] for x in src_x for y in src_y], dtype=jnp.int32)
+    recv_coords = jnp.array([[x + 0.1, y + 0.1] for x in recv_x for y in recv_y], dtype=jnp.int32)
 
     return src_coords, recv_coords
 
