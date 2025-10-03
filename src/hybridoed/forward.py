@@ -4,8 +4,10 @@ from jwave.geometry import Domain
 from scipy.special import hankel1
 from jwave.acoustics.time_harmonic import helmholtz_solver
 from jwave.geometry import Domain, Medium
+import jax
 from jax import jit, lax
 from typing import Sequence, Tuple
+
 
 
 
@@ -529,8 +531,8 @@ def acoustic2D_pml_minmem(velocity,
                         [[0,0],[0,1]], 'constant') / rho_y_half
 
         lap = dt2 * (
-            jnp.pad((dp_dx[1:,:] - dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'constant')
-        + jnp.pad((dp_dy[:,1:] - dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'constant')
+            jnp.pad((dp_dx[1:,:] - dp_dx[:-1,:]) / dx, [[1,0],[0,0]], 'edge')
+        + jnp.pad((dp_dy[:,1:] - dp_dy[:,:-1]) / dy, [[0,0],[1,0]], 'edge')
         ) * kappa
 
         β_sum = beta_x[:, None] + beta_y[None, :]
@@ -596,6 +598,450 @@ def acoustic2D_pml_minmem(velocity,
         return (p_curr, p_next), out
 
     (_, _), ys = lax.scan(step, (p_nm1, p_n), jnp.arange(n_steps))
+    return ys
+
+def _cpml_1d(n, dx, dt, pml_width, c_ref, f0,
+             R=1e-6, m=3, kappa_max=3.0, alpha_max=None):
+    """
+    Build 1-D CPML profiles and ADE coeffs at a given index grid (length n).
+    Returns dict with sigma, kappa, alpha, a, b (all shape (n,)).
+    Zero in interior; graded within 'pml_width' cells from each boundary.
+    """
+    if alpha_max is None:
+        alpha_max = 2.0 * jnp.pi * f0  # helps low-freq/grazing
+
+    # Physical thickness of this PML (per side)
+    delta = pml_width * dx
+    # Roden-Gedney recommended sigma_max
+    sigma_max = - (m + 1) * jnp.log(R) * c_ref / (2.0 * delta + 1e-12)
+
+    idx = jnp.arange(n, dtype=jnp.float32)
+
+    # distance (in cells) from the nearest boundary if in PML, else 0
+    d_left  = jnp.clip(pml_width - idx, a_min=0.0)
+    d_right = jnp.clip(idx - (n - 1 - pml_width), a_min=0.0)
+    d = jnp.maximum(d_left, d_right)   # 0 in interior, 1..pml_width in the layer
+    xi = d / jnp.maximum(pml_width, 1) # normalized [0,1]
+
+    # polynomial grading
+    sigma = sigma_max * xi**m
+    kappa = 1.0 + (kappa_max - 1.0) * xi**m
+    # alpha: high at inner edge, tapering to 0 at outer boundary
+    alpha = alpha_max * (1.0 - xi)
+
+    # ADE coefficients
+    b = jnp.exp(- (sigma / kappa + alpha) * dt)
+    # safe denominator
+    denom = (sigma + kappa * alpha) * kappa + 1e-30
+    a = sigma * (b - 1.0) / denom
+
+    return {"sigma": sigma.astype(jnp.float32),
+            "kappa": kappa.astype(jnp.float32),
+            "alpha": alpha.astype(jnp.float32),
+            "a": a.astype(jnp.float32),
+            "b": b.astype(jnp.float32)}
+
+
+def acoustic2D_cpml_minmem(velocity,
+                           density,
+                           source_i,           # (sx, sy) float indices, same convention as yours
+                           f0,
+                           dx, dy, dt,
+                           n_steps,
+                           receiver_is=None,   # (Nrec, 2) float indices
+                           output_wavefield=True,
+                           pml_width=10,
+                           R_coeff=1e-6,
+                           m=3,
+                           kappa_max=3.0,
+                           alpha_max=None):
+    """
+    2-D acoustic FD (1st-order, staggered) with true CPML via ADE.
+    Memory-lean: p (nx,ny), vx (nx+1,ny), vy (nx,ny+1) + 4 memory vars.
+
+    Positions:
+      - p at cell centers (i,j) -> shape (nx, ny)
+      - vx at x-faces (i+1/2, j) -> shape (nx+1, ny)
+      - vy at y-faces (i, j+1/2) -> shape (nx, ny+1)
+
+    CPML uses separate 1-D profiles on faces/centers per axis.
+    """
+    nx, ny = velocity.shape
+    assert density.shape == velocity.shape
+
+    # material props (float32)
+    K   = (density * velocity**2).astype(jnp.float32)   # bulk modulus at centers
+    rho = density.astype(jnp.float32)
+
+    # Face densities (harmonic) for staggered updates
+    # x-faces: (nx+1, ny)
+    rho_L = jnp.pad(rho, ((1,0),(0,0)), mode='edge')  # left cell for face i
+    rho_R = jnp.pad(rho, ((0,1),(0,0)), mode='edge')  # right cell for face i
+    inv_rho_x = (2.0 / (rho_L + rho_R)).astype(jnp.float32)
+
+    # y-faces: (nx, ny+1)
+    rho_B = jnp.pad(rho, ((0,0),(1,0)), mode='edge')  # bottom cell for face j
+    rho_T = jnp.pad(rho, ((0,0),(0,1)), mode='edge')  # top cell for face j
+    inv_rho_y = (2.0 / (rho_B + rho_T)).astype(jnp.float32)
+
+    # Allocate fields
+    p  = jnp.zeros((nx,   ny  ), dtype=jnp.float32)
+    vx = jnp.zeros((nx+1, ny  ), dtype=jnp.float32)
+    vy = jnp.zeros((nx,   ny+1), dtype=jnp.float32)
+
+    # CPML memory variables
+    psi_px = jnp.zeros_like(vx)       # modifies ∂p/∂x in vx update
+    psi_py = jnp.zeros_like(vy)       # modifies ∂p/∂y in vy update
+    phi_vx = jnp.zeros_like(p)        # modifies ∂vx/∂x in p update
+    phi_vy = jnp.zeros_like(p)        # modifies ∂vy/∂y in p update
+
+    # Build 1-D CPML coeffs at **faces** (for dp/dx, dp/dy) and **centers** (for dv/dx, dv/dy)
+    c_ref_x = velocity.max().astype(jnp.float32)
+    c_ref_y = c_ref_x
+
+    coeff_x_faces   = _cpml_1d(nx+1, dx, dt, pml_width, c_ref_x, f0, R_coeff, m, kappa_max, alpha_max)
+    coeff_y_faces   = _cpml_1d(ny+1, dy, dt, pml_width, c_ref_y, f0, R_coeff, m, kappa_max, alpha_max)
+    coeff_x_centers = _cpml_1d(nx,   dx, dt, pml_width, c_ref_x, f0, R_coeff, m, kappa_max, alpha_max)
+    coeff_y_centers = _cpml_1d(ny,   dy, dt, pml_width, c_ref_y, f0, R_coeff, m, kappa_max, alpha_max)
+
+    # Broadcast helpers
+    ax_f = coeff_x_faces   ; ay_f = coeff_y_faces
+    ax_c = coeff_x_centers ; ay_c = coeff_y_centers
+
+    # Source (Ricker) constants
+    t0     = (1.2 / f0)
+    a_const= (jnp.pi * f0)**2
+    # --- source bilinear weights (distinct names) ---
+    sx_f, sy_f = source_i
+    i0 = jnp.clip(jnp.floor(sx_f).astype(jnp.int32), 0, nx-2)
+    j0 = jnp.clip(jnp.floor(sy_f).astype(jnp.int32), 0, ny-2)
+    di = sx_f - i0
+    dj = sy_f - j0
+    ws00 = (1 - di)*(1 - dj)
+    ws10 = di      *(1 - dj)
+    ws01 = (1 - di)*dj
+    ws11 = di      *dj
+
+    src_amp_pa_per_s = 10e7*6
+
+    def step(carry, it):
+        p, vx, vy, psi_px, psi_py, phi_vx, phi_vy = carry
+        t = it * dt
+
+        # ===== velocities =====
+        # dp/dx on x-faces -> (nx+1, ny)
+        p_xpad = jnp.pad(p, ((1,1),(0,0)), mode='edge')             # (nx+2, ny)
+        dpdx   = (p_xpad[1:, :] - p_xpad[:-1, :]) / dx              # (nx+1, ny)
+        psi_px = ax_f["b"].reshape(-1,1) * psi_px + ax_f["a"].reshape(-1,1) * dpdx
+        dpdx_tilde = dpdx / ax_f["kappa"].reshape(-1,1) + psi_px
+        vx = vx - dt * inv_rho_x * dpdx_tilde
+
+        # dp/dy on y-faces -> (nx, ny+1)
+        p_ypad = jnp.pad(p, ((0,0),(1,1)), mode='edge')             # (nx, ny+2)
+        dpdy   = (p_ypad[:, 1:] - p_ypad[:, :-1]) / dy              # (nx, ny+1)
+        psi_py = ay_f["b"].reshape(1,-1) * psi_py + ay_f["a"].reshape(1,-1) * dpdy
+        dpdy_tilde = dpdy / ay_f["kappa"].reshape(1,-1) + psi_py
+        vy = vy - dt * inv_rho_y * dpdy_tilde
+
+        # ===== pressure =====
+        dvxdx = (vx[1:, :] - vx[:-1, :]) / dx                       # (nx, ny)
+        phi_vx = ax_c["b"].reshape(-1,1) * phi_vx + ax_c["a"].reshape(-1,1) * dvxdx
+        dvxdx_tilde = dvxdx / ax_c["kappa"].reshape(-1,1) + phi_vx
+
+        dvydy = (vy[:, 1:] - vy[:, :-1]) / dy                       # (nx, ny)
+        phi_vy = ay_c["b"].reshape(1,-1) * phi_vy + ay_c["a"].reshape(1,-1) * dvydy
+        dvydy_tilde = dvydy / ay_c["kappa"].reshape(1,-1) + phi_vy
+
+        p = p - dt * K * (dvxdx_tilde + dvydy_tilde)
+
+        # ===== source (use ws** that were defined outside) =====
+        ricker = (1.0 - 2.0 * a_const * (t - t0)**2) * jnp.exp(-a_const * (t - t0)**2)
+        src = (ricker * dt).astype(jnp.float32)
+        src = (dt * src_amp_pa_per_s) * ricker
+        p = p.at[i0,   j0  ].add(ws00 * src)
+        p = p.at[i0+1, j0  ].add(ws10 * src)
+        p = p.at[i0,   j0+1].add(ws01 * src)
+        p = p.at[i0+1, j0+1].add(ws11 * src)
+
+        # ===== receivers (rename weights to avoid shadowing) =====
+        out = []
+        if receiver_is is not None:
+            sx_rec = receiver_is[:, 0]
+            sy_rec = receiver_is[:, 1]
+            i0r = jnp.clip(jnp.floor(sx_rec).astype(jnp.int32), 0, nx-2)
+            j0r = jnp.clip(jnp.floor(sy_rec).astype(jnp.int32), 0, ny-2)
+            dir_ = sx_rec - i0r
+            djr_ = sy_rec - j0r
+
+            v00 = p[i0r,   j0r  ]
+            v10 = p[i0r+1, j0r  ]
+            v01 = p[i0r,   j0r+1]
+            v11 = p[i0r+1, j0r+1]
+
+            wr00 = (1-dir_)*(1-djr_)
+            wr10 = dir_    *(1-djr_)
+            wr01 = (1-dir_)*djr_
+            wr11 = dir_    *djr_
+
+            rec_vals = wr00*v00 + wr10*v10 + wr01*v01 + wr11*v11
+            out.append(rec_vals)
+
+        if output_wavefield:
+            out.append(p)
+
+        new_carry = (p, vx, vy, psi_px, psi_py, phi_vx, phi_vy)
+        return new_carry, out
+
+    carry0 = (p, vx, vy, psi_px, psi_py, phi_vx, phi_vy)
+    _, ys = lax.scan(step, carry0, jnp.arange(n_steps, dtype=jnp.int32))
+    return ys
+
+
+# ---------- helper: CPML coeffs with alpha=0 in interior ----------
+def _cpml_1d_fixed(n, dx, dt, pml_width, c_ref, f0,
+                   R=1e-6, m=3, kappa_max=3.0, alpha_max=None):
+    if alpha_max is None:
+        alpha_max = 2.0 * jnp.pi * f0
+    delta = jnp.maximum(pml_width * dx, 1e-12)
+    sigma_max = - (m + 1) * jnp.log(R) * c_ref / (2.0 * delta)
+
+    idx = jnp.arange(n, dtype=jnp.float32)
+    d_left  = jnp.clip(pml_width - idx, a_min=0.0)
+    d_right = jnp.clip(idx - (n - 1 - pml_width), a_min=0.0)
+    d  = jnp.maximum(d_left, d_right)                      # 0 in interior
+    xi = d / jnp.maximum(pml_width, 1.0)
+
+    sigma = sigma_max * xi**m
+    kappa = 1.0 + (kappa_max - 1.0) * xi**m
+    alpha = jnp.where(xi > 0.0, alpha_max * (1.0 - xi), 0.0)
+
+    b = jnp.exp(- (sigma / kappa + alpha) * dt)
+    denom = (sigma + kappa * alpha) * kappa + 1e-30
+    a = sigma * (b - 1.0) / denom
+
+    return {k: v.astype(jnp.float32) for k, v in
+            dict(sigma=sigma, kappa=kappa, alpha=alpha, a=a, b=b).items()}
+
+# ---------- helper: "store in half" with float32 gradients ----------
+@jax.custom_vjp
+def _store_f16(x):  # forward: cast to fp16; backward: pass cotangent in f32
+    return lax.convert_element_type(x, jnp.float16)
+def _store_f16_fwd(x):
+    y = lax.convert_element_type(x, jnp.float16)
+    return y, None
+def _store_f16_bwd(res, g):
+    return (lax.convert_element_type(g, jnp.float32),)
+_store_f16.defvjp(_store_f16_fwd, _store_f16_bwd)
+
+@jax.custom_vjp
+def _store_bf16(x):
+    return lax.convert_element_type(x, jnp.bfloat16)
+def _store_bf16_fwd(x):
+    y = lax.convert_element_type(x, jnp.bfloat16)
+    return y, None
+def _store_bf16_bwd(res, g):
+    return (lax.convert_element_type(g, jnp.float32),)
+_store_bf16.defvjp(_store_bf16_fwd, _store_bf16_bwd)
+
+# ---------- the differentiable, strip-only CPML ----------
+def acoustic2D_cpml_minmem_strips_diff(
+    velocity,
+    density,
+    source_i,            # (sx, sy) floats in index space (cell centers)
+    f0,
+    dx, dy, dt,
+    n_steps,
+    receiver_is=None,    # (Nrec,2) floats in index space
+    output_wavefield=True,
+    pml_width=10,
+    R_coeff=1e-6,
+    m=3,
+    kappa_max=3.0,
+    alpha_max=None,
+    src_amp_pa_per_s=3e8,
+    use_bfloat16=False,
+):
+    nx, ny = velocity.shape
+    rho = density.astype(jnp.float32)
+    c   = velocity.astype(jnp.float32)
+    K   = (rho * c**2).astype(jnp.float32)                 # centers
+
+    # harmonic face inverse densities
+    inv_rho_x = (2.0 / (jnp.pad(rho, ((1,0),(0,0)), 'edge') +
+                        jnp.pad(rho, ((0,1),(0,0)), 'edge'))).astype(jnp.float32)  # (nx+1,ny)
+    inv_rho_y = (2.0 / (jnp.pad(rho, ((0,0),(1,0)), 'edge') +
+                        jnp.pad(rho, ((0,0),(0,1)), 'edge'))).astype(jnp.float32)  # (nx,ny+1)
+
+    # fields
+    p  = jnp.zeros((nx,   ny  ), jnp.float32)
+    vx = jnp.zeros((nx+1, ny  ), jnp.float32)
+    vy = jnp.zeros((nx,   ny+1), jnp.float32)
+
+    # widths for faces vs centers
+    pml_fx = int(min(pml_width, nx + 1))
+    pml_fy = int(min(pml_width, ny + 1))
+    pml_cx = int(min(pml_width, nx))
+    pml_cy = int(min(pml_width, ny))
+
+    # CPML coeffs
+    c_ref = c.max().astype(jnp.float32)
+    ax_f = _cpml_1d_fixed(nx+1, dx, dt, pml_width, c_ref, f0, R_coeff, m, kappa_max, alpha_max)
+    ay_f = _cpml_1d_fixed(ny+1, dy, dt, pml_width, c_ref, f0, R_coeff, m, kappa_max, alpha_max)
+    ax_c = _cpml_1d_fixed(nx,   dx, dt, pml_width, c_ref, f0, R_coeff, m, kappa_max, alpha_max)
+    ay_c = _cpml_1d_fixed(ny,   dy, dt, pml_width, c_ref, f0, R_coeff, m, kappa_max, alpha_max)
+
+    # choose storage op
+    store_hp = _store_bf16 if use_bfloat16 else _store_f16
+    hp_dtype = jnp.bfloat16 if use_bfloat16 else jnp.float16
+
+    # memvars (stored in half; we always upcast to f32 on read)
+    psi_px_L = jnp.zeros((pml_fx, ny), dtype=hp_dtype)
+    psi_px_R = jnp.zeros((pml_fx, ny), dtype=hp_dtype)
+    psi_py_B = jnp.zeros((nx, pml_fy), dtype=hp_dtype)
+    psi_py_T = jnp.zeros((nx, pml_fy), dtype=hp_dtype)
+    phi_vx_L = jnp.zeros((pml_cx, ny), dtype=hp_dtype)
+    phi_vx_R = jnp.zeros((pml_cx, ny), dtype=hp_dtype)
+    phi_vy_B = jnp.zeros((nx, pml_cy), dtype=hp_dtype)
+    phi_vy_T = jnp.zeros((nx, pml_cy), dtype=hp_dtype)
+
+    # precompute bilinear weights for source at centers
+    sx, sy = source_i
+    i0 = jnp.clip(jnp.floor(sx).astype(jnp.int32), 0, nx-2)
+    j0 = jnp.clip(jnp.floor(sy).astype(jnp.int32), 0, ny-2)
+    di = sx - i0
+    dj = sy - j0
+    ws00 = (1.0 - di) * (1.0 - dj)
+    ws10 = di * (1.0 - dj)
+    ws01 = (1.0 - di) * dj
+    ws11 = di * dj
+
+    # ricker
+    t0 = 1.2 / f0
+    a  = (jnp.pi * f0) ** 2
+
+    # strip indices
+    iL_fx = slice(0, pml_fx);           iR_fx = slice((nx+1) - pml_fx, nx+1)
+    jB_fy = slice(0, pml_fy);           jT_fy = slice((ny+1) - pml_fy, ny+1)
+    iL_cx = slice(0, pml_cx);           iR_cx = slice(nx - pml_cx, nx)
+    jB_cy = slice(0, pml_cy);           jT_cy = slice(ny - pml_cy, ny)
+
+    def _update_hp(prev_hp, a32, b32, deriv32):
+        prev32 = lax.convert_element_type(prev_hp, jnp.float32)
+        upd32  = b32 * prev32 + a32 * deriv32      # math in f32
+        return store_hp(upd32), upd32               # (stored half, f32 to use now)
+
+    def step(carry, it):
+        (p, vx, vy,
+         psi_px_L, psi_px_R, psi_py_B, psi_py_T,
+         phi_vx_L, phi_vx_R, phi_vy_B, phi_vy_T) = carry
+
+        t = it * dt
+
+        # dp/dx on faces
+        p_xpad = jnp.pad(p, ((1,1),(0,0)), mode='edge')
+        dpdx   = (p_xpad[1:, :] - p_xpad[:-1, :]) / dx          # (nx+1, ny)
+
+        p_ypad = jnp.pad(p, ((0,0),(1,1)), mode='edge')
+        dpdy   = (p_ypad[:, 1:] - p_ypad[:, :-1]) / dy          # (nx, ny+1)
+
+        dpdx_tilde = dpdx
+        dpdy_tilde = dpdy
+
+        if pml_fx > 0:
+            aL = ax_f["a"][iL_fx][:, None]; bL = ax_f["b"][iL_fx][:, None]
+            kL = ax_f["kappa"][iL_fx][:, None]
+            aR = ax_f["a"][iR_fx][:, None]; bR = ax_f["b"][iR_fx][:, None]
+            kR = ax_f["kappa"][iR_fx][:, None]
+
+            psi_px_L, psi_px_L32 = _update_hp(psi_px_L, aL, bL, dpdx[iL_fx, :])
+            psi_px_R, psi_px_R32 = _update_hp(psi_px_R, aR, bR, dpdx[iR_fx, :])
+
+            dpdx_tilde = dpdx_tilde.at[iL_fx, :].set(dpdx[iL_fx, :] / kL + psi_px_L32)
+            dpdx_tilde = dpdx_tilde.at[iR_fx, :].set(dpdx[iR_fx, :] / kR + psi_px_R32)
+
+        if pml_fy > 0:
+            aB = ay_f["a"][jB_fy][None, :]; bB = ay_f["b"][jB_fy][None, :]
+            kB = ay_f["kappa"][jB_fy][None, :]
+            aT = ay_f["a"][jT_fy][None, :]; bT = ay_f["b"][jT_fy][None, :]
+            kT = ay_f["kappa"][jT_fy][None, :]
+
+            psi_py_B, psi_py_B32 = _update_hp(psi_py_B, aB, bB, dpdy[:, jB_fy])
+            psi_py_T, psi_py_T32 = _update_hp(psi_py_T, aT, bT, dpdy[:, jT_fy])
+
+            dpdy_tilde = dpdy_tilde.at[:, jB_fy].set(dpdy[:, jB_fy] / kB + psi_py_B32)
+            dpdy_tilde = dpdy_tilde.at[:, jT_fy].set(dpdy[:, jT_fy] / kT + psi_py_T32)
+
+        # velocities
+        vx = vx - dt * inv_rho_x * dpdx_tilde
+        vy = vy - dt * inv_rho_y * dpdy_tilde
+
+        # divergence at centers
+        dvxdx = (vx[1:, :] - vx[:-1, :]) / dx
+        dvydy = (vy[:, 1:] - vy[:, :-1]) / dy
+
+        dvxdx_tilde = dvxdx
+        dvydy_tilde = dvydy
+
+        if pml_cx > 0:
+            aL = ax_c["a"][iL_cx][:, None]; bL = ax_c["b"][iL_cx][:, None]
+            kL = ax_c["kappa"][iL_cx][:, None]
+            aR = ax_c["a"][iR_cx][:, None]; bR = ax_c["b"][iR_cx][:, None]
+            kR = ax_c["kappa"][iR_cx][:, None]
+
+            phi_vx_L, phi_vx_L32 = _update_hp(phi_vx_L, aL, bL, dvxdx[iL_cx, :])
+            phi_vx_R, phi_vx_R32 = _update_hp(phi_vx_R, aR, bR, dvxdx[iR_cx, :])
+
+            dvxdx_tilde = dvxdx_tilde.at[iL_cx, :].set(dvxdx[iL_cx, :] / kL + phi_vx_L32)
+            dvxdx_tilde = dvxdx_tilde.at[iR_cx, :].set(dvxdx[iR_cx, :] / kR + phi_vx_R32)
+
+        if pml_cy > 0:
+            aB = ay_c["a"][jB_cy][None, :]; bB = ay_c["b"][jB_cy][None, :]
+            kB = ay_c["kappa"][jB_cy][None, :]
+            aT = ay_c["a"][jT_cy][None, :]; bT = ay_c["b"][jT_cy][None, :]
+            kT = ay_c["kappa"][jT_cy][None, :]
+
+            phi_vy_B, phi_vy_B32 = _update_hp(phi_vy_B, aB, bB, dvydy[:, jB_cy])
+            phi_vy_T, phi_vy_T32 = _update_hp(phi_vy_T, aT, bT, dvydy[:, jT_cy])
+
+            dvydy_tilde = dvydy_tilde.at[:, jB_cy].set(dvydy[:, jB_cy] / kB + phi_vy_B32)
+            dvydy_tilde = dvydy_tilde.at[:, jT_cy].set(dvydy[:, jT_cy] / kT + phi_vy_T32)
+
+        # pressure
+        p = p - dt * K * (dvxdx_tilde + dvydy_tilde)
+
+        # source (centered, bilinear scatter)
+        ricker = (1.0 - 2.0 * a * (t - t0) ** 2) * jnp.exp(-a * (t - t0) ** 2)
+        src = (dt * src_amp_pa_per_s) * ricker
+        p = p.at[i0,   j0  ].add(ws00 * src)
+        p = p.at[i0+1, j0  ].add(ws10 * src)
+        p = p.at[i0,   j0+1].add(ws01 * src)
+        p = p.at[i0+1, j0+1].add(ws11 * src)
+
+        outs = []
+        if receiver_is is not None:
+            sx_rec = receiver_is[:, 0];  sy_rec = receiver_is[:, 1]
+            i0r = jnp.clip(jnp.floor(sx_rec).astype(jnp.int32), 0, nx-2)
+            j0r = jnp.clip(jnp.floor(sy_rec).astype(jnp.int32), 0, ny-2)
+            dir_ = sx_rec - i0r;  djr_ = sy_rec - j0r
+            v00 = p[i0r,   j0r  ]; v10 = p[i0r+1, j0r  ]
+            v01 = p[i0r,   j0r+1]; v11 = p[i0r+1, j0r+1]
+            wr00 = (1.0-dir_)*(1.0-djr_); wr10 = dir_*(1.0-djr_)
+            wr01 = (1.0-dir_)*djr_;       wr11 = dir_*djr_
+            rec_vals = wr00*v00 + wr10*v10 + wr01*v01 + wr11*v11
+            outs.append(rec_vals)
+        if output_wavefield:
+            outs.append(p)
+
+        new_carry = (p, vx, vy,
+                     psi_px_L, psi_px_R, psi_py_B, psi_py_T,
+                     phi_vx_L, phi_vx_R, phi_vy_B, phi_vy_T)
+        return new_carry, outs
+
+    carry0 = (p, vx, vy,
+              psi_px_L, psi_px_R, psi_py_B, psi_py_T,
+              phi_vx_L, phi_vx_R, phi_vy_B, phi_vy_T)
+
+    _, ys = lax.scan(step, carry0, jnp.arange(n_steps, dtype=jnp.int32))
     return ys
 
 def acoustic2D_pml_4th_minmem(velocity,
