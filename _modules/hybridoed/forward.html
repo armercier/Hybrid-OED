@@ -6,7 +6,7 @@
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>hybridoed.forward - Hybrid OED</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
     
@@ -238,15 +238,15 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for hybridoed.forward</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jax.numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">jnp</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jwave</span><span class="w"> </span><span class="kn">import</span> <span class="n">FourierSeries</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jwave.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Domain</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">hankel1</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jwave.acoustics.time_harmonic</span><span class="w"> </span><span class="kn">import</span> <span class="n">helmholtz_solver</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jwave.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">Medium</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">jax</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">lax</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">from</span> <span class="nn">jwave</span> <span class="kn">import</span> <span class="n">FourierSeries</span>
+<span class="kn">from</span> <span class="nn">jwave.geometry</span> <span class="kn">import</span> <span class="n">Domain</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">hankel1</span>
+<span class="kn">from</span> <span class="nn">jwave.acoustics.time_harmonic</span> <span class="kn">import</span> <span class="n">helmholtz_solver</span>
+<span class="kn">from</span> <span class="nn">jwave.geometry</span> <span class="kn">import</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">Medium</span>
+<span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">lax</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 
 
 
@@ -254,7 +254,7 @@
 
 <div class="viewcode-block" id="create_src_field">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.create_src_field">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_src_field</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">create_src_field</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">domain</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create a source field with bilinear interpolation at the given (x, y) coordinates</span>
 <span class="sd">    and compute its Fourier Series.</span>
@@ -334,7 +334,7 @@
 <div class="viewcode-block" id="solve_helmholtz_general">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.solve_helmholtz_general">[docs]</a>
 <span class="nd">@jit</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">solve_helmholtz_general</span><span class="p">(</span><span class="n">sound_speed</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">src_coord</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">solve_helmholtz_general</span><span class="p">(</span><span class="n">sound_speed</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">domain</span><span class="p">:</span> <span class="n">Domain</span><span class="p">,</span> <span class="n">src_coord</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">omega</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pml_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Solve the general Helmholtz equation for a given sound speed distribution, source location, and frequency.</span>
 
@@ -387,7 +387,7 @@
 
 <div class="viewcode-block" id="get_analytical_greens_function">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.get_analytical_greens_function">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_analytical_greens_function</span><span class="p">(</span><span class="n">L_x</span><span class="p">,</span> <span class="n">L_y</span><span class="p">,</span> <span class="n">acoustic_velocity</span><span class="p">,</span> <span class="n">x_source</span><span class="p">,</span> <span class="n">y_source</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_analytical_greens_function</span><span class="p">(</span><span class="n">L_x</span><span class="p">,</span> <span class="n">L_y</span><span class="p">,</span> <span class="n">acoustic_velocity</span><span class="p">,</span> <span class="n">x_source</span><span class="p">,</span> <span class="n">y_source</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compute the Green&#39;s function for a 2D wave equation.</span>
 
@@ -459,7 +459,7 @@
 
 <div class="viewcode-block" id="generate_2D_gridded_src_rec_positions">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.generate_2D_gridded_src_rec_positions">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_2D_gridded_src_rec_positions</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">70</span><span class="p">),</span> <span class="n">num_sources</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_receivers</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">generate_2D_gridded_src_rec_positions</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">70</span><span class="p">),</span> <span class="n">num_sources</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_receivers</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a 2D grid of positions for sources and receivers with more sources than receivers,</span>
 <span class="sd">    arranged in a staggered grid. The offset between a source and a receiver is half the source spacing.</span>
@@ -492,7 +492,7 @@
 
 <div class="viewcode-block" id="generate_src_rec_positions">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.generate_src_rec_positions">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">generate_src_rec_positions</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">generate_src_rec_positions</span><span class="p">(</span>
     <span class="n">src_x</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="n">src_y</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="n">rec_x</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
@@ -530,7 +530,7 @@
 
 <div class="viewcode-block" id="ricker_wavelet">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.ricker_wavelet">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">ricker_wavelet</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">t_shift</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">ricker_wavelet</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">t_shift</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generate a Ricker wavelet with a time shift.</span>
 
@@ -553,7 +553,7 @@
 
 <div class="viewcode-block" id="acoustic2D">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">acoustic2D</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
                <span class="n">density</span><span class="p">,</span>
                <span class="n">source_i</span><span class="p">,</span>
                <span class="n">f0</span><span class="p">,</span>
@@ -579,7 +579,7 @@
 
     <span class="c1"># TODO: add absorbing boundary</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="n">pressure_past</span><span class="p">,</span> <span class="n">pressure_present</span> <span class="o">=</span> <span class="n">carry</span>
 
         <span class="n">t</span> <span class="o">=</span> <span class="n">it</span><span class="o">*</span><span class="n">dt</span>
@@ -624,7 +624,7 @@
 
 <div class="viewcode-block" id="acoustic2D_pml">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D_pml">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D_pml</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">acoustic2D_pml</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
                    <span class="n">density</span><span class="p">,</span>
                    <span class="n">source_i</span><span class="p">,</span>
                    <span class="n">f0</span><span class="p">,</span>
@@ -656,7 +656,7 @@
 
     <span class="c1"># build PML damping profile</span>
     <span class="n">sigma_max</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">velocity</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">R_coeff</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">pml_width</span> <span class="o">*</span> <span class="n">dx</span><span class="p">)</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">make_sigma</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">npml</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_sigma</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">npml</span><span class="p">):</span>
         <span class="n">i</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
         <span class="n">left</span>  <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">npml</span><span class="p">,</span>       <span class="p">(</span><span class="n">npml</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="n">npml</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">right</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">npml</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">npml</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">npml</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
@@ -665,7 +665,7 @@
     <span class="n">σy</span> <span class="o">=</span> <span class="n">make_sigma</span><span class="p">(</span><span class="n">ny</span><span class="p">,</span> <span class="n">pml_width</span><span class="p">)</span>
     <span class="n">sigma2d</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">σx</span><span class="p">,</span> <span class="n">σy</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="n">p_nm1</span><span class="p">,</span> <span class="n">p_n</span> <span class="o">=</span> <span class="n">carry</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">it</span> <span class="o">*</span> <span class="n">dt</span>
 
@@ -711,7 +711,7 @@
 
 <div class="viewcode-block" id="acoustic2D_pml_minmem">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D_pml_minmem">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D_pml_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">acoustic2D_pml_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
                          <span class="n">density</span><span class="p">,</span>
                          <span class="n">source_i</span><span class="p">,</span>
                          <span class="n">f0</span><span class="p">,</span>
@@ -785,7 +785,7 @@
     <span class="n">beta_x</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma_max</span> <span class="o">*</span> <span class="n">ramp_x</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="c1"># shape (nx,)</span>
     <span class="n">beta_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">sigma_max</span> <span class="o">*</span> <span class="n">ramp_y</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>  <span class="c1"># shape (ny,)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="n">p_prev</span><span class="p">,</span> <span class="n">p_curr</span> <span class="o">=</span> <span class="n">carry</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">it</span> <span class="o">*</span> <span class="n">dt</span>
 
@@ -867,7 +867,7 @@
     <span class="k">return</span> <span class="n">ys</span></div>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_cpml_1d</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">pml_width</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_cpml_1d</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">pml_width</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span>
              <span class="n">R</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">kappa_max</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">alpha_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Build 1-D CPML profiles and ADE coeffs at a given index grid (length n).</span>
@@ -911,7 +911,7 @@
 
 <div class="viewcode-block" id="acoustic2D_cpml_minmem">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D_cpml_minmem">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D_cpml_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">acoustic2D_cpml_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
                            <span class="n">density</span><span class="p">,</span>
                            <span class="n">source_i</span><span class="p">,</span>           <span class="c1"># (sx, sy) float indices, same convention as yours</span>
                            <span class="n">f0</span><span class="p">,</span>
@@ -993,7 +993,7 @@
 
     <span class="n">src_amp_pa_per_s</span> <span class="o">=</span> <span class="mf">10e7</span><span class="o">*</span><span class="mi">6</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="n">p</span><span class="p">,</span> <span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">,</span> <span class="n">psi_px</span><span class="p">,</span> <span class="n">psi_py</span><span class="p">,</span> <span class="n">phi_vx</span><span class="p">,</span> <span class="n">phi_vy</span> <span class="o">=</span> <span class="n">carry</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">it</span> <span class="o">*</span> <span class="n">dt</span>
 
@@ -1068,7 +1068,7 @@
 
 
 <span class="c1"># ---------- helper: CPML coeffs with alpha=0 in interior ----------</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_cpml_1d_fixed</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">pml_width</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_cpml_1d_fixed</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">pml_width</span><span class="p">,</span> <span class="n">c_ref</span><span class="p">,</span> <span class="n">f0</span><span class="p">,</span>
                    <span class="n">R</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">m</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">kappa_max</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">alpha_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">alpha_max</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">alpha_max</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">jnp</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">f0</span>
@@ -1094,29 +1094,29 @@
 
 <span class="c1"># ---------- helper: &quot;store in half&quot; with float32 gradients ----------</span>
 <span class="nd">@jax</span><span class="o">.</span><span class="n">custom_vjp</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_f16</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># forward: cast to fp16; backward: pass cotangent in f32</span>
+<span class="k">def</span> <span class="nf">_store_f16</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># forward: cast to fp16; backward: pass cotangent in f32</span>
     <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_f16_fwd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_f16_fwd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_f16_bwd</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_f16_bwd</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">),)</span>
 <span class="n">_store_f16</span><span class="o">.</span><span class="n">defvjp</span><span class="p">(</span><span class="n">_store_f16_fwd</span><span class="p">,</span> <span class="n">_store_f16_bwd</span><span class="p">)</span>
 
 <span class="nd">@jax</span><span class="o">.</span><span class="n">custom_vjp</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_bf16</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_bf16</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_bf16_fwd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_bf16_fwd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">bfloat16</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_store_bf16_bwd</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_bf16_bwd</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">),)</span>
 <span class="n">_store_bf16</span><span class="o">.</span><span class="n">defvjp</span><span class="p">(</span><span class="n">_store_bf16_fwd</span><span class="p">,</span> <span class="n">_store_bf16_bwd</span><span class="p">)</span>
 
 <span class="c1"># ---------- the differentiable, strip-only CPML ----------</span>
 <div class="viewcode-block" id="acoustic2D_cpml_minmem_strips_diff">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D_cpml_minmem_strips_diff">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D_cpml_minmem_strips_diff</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">acoustic2D_cpml_minmem_strips_diff</span><span class="p">(</span>
     <span class="n">velocity</span><span class="p">,</span>
     <span class="n">density</span><span class="p">,</span>
     <span class="n">source_i</span><span class="p">,</span>            <span class="c1"># (sx, sy) floats in index space (cell centers)</span>
@@ -1197,12 +1197,12 @@
     <span class="n">iL_cx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pml_cx</span><span class="p">);</span>           <span class="n">iR_cx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">nx</span> <span class="o">-</span> <span class="n">pml_cx</span><span class="p">,</span> <span class="n">nx</span><span class="p">)</span>
     <span class="n">jB_cy</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">pml_cy</span><span class="p">);</span>           <span class="n">jT_cy</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">ny</span> <span class="o">-</span> <span class="n">pml_cy</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_update_hp</span><span class="p">(</span><span class="n">prev_hp</span><span class="p">,</span> <span class="n">a32</span><span class="p">,</span> <span class="n">b32</span><span class="p">,</span> <span class="n">deriv32</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_update_hp</span><span class="p">(</span><span class="n">prev_hp</span><span class="p">,</span> <span class="n">a32</span><span class="p">,</span> <span class="n">b32</span><span class="p">,</span> <span class="n">deriv32</span><span class="p">):</span>
         <span class="n">prev32</span> <span class="o">=</span> <span class="n">lax</span><span class="o">.</span><span class="n">convert_element_type</span><span class="p">(</span><span class="n">prev_hp</span><span class="p">,</span> <span class="n">jnp</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
         <span class="n">upd32</span>  <span class="o">=</span> <span class="n">b32</span> <span class="o">*</span> <span class="n">prev32</span> <span class="o">+</span> <span class="n">a32</span> <span class="o">*</span> <span class="n">deriv32</span>      <span class="c1"># math in f32</span>
         <span class="k">return</span> <span class="n">store_hp</span><span class="p">(</span><span class="n">upd32</span><span class="p">),</span> <span class="n">upd32</span>               <span class="c1"># (stored half, f32 to use now)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">,</span>
          <span class="n">psi_px_L</span><span class="p">,</span> <span class="n">psi_px_R</span><span class="p">,</span> <span class="n">psi_py_B</span><span class="p">,</span> <span class="n">psi_py_T</span><span class="p">,</span>
          <span class="n">phi_vx_L</span><span class="p">,</span> <span class="n">phi_vx_R</span><span class="p">,</span> <span class="n">phi_vy_B</span><span class="p">,</span> <span class="n">phi_vy_T</span><span class="p">)</span> <span class="o">=</span> <span class="n">carry</span>
@@ -1319,7 +1319,7 @@
 
 <div class="viewcode-block" id="acoustic2D_pml_4th_minmem">
 <a class="viewcode-back" href="../../hybridoed.html#hybridoed.forward.acoustic2D_pml_4th_minmem">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">acoustic2D_pml_4th_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">acoustic2D_pml_4th_minmem</span><span class="p">(</span><span class="n">velocity</span><span class="p">,</span>
                              <span class="n">density</span><span class="p">,</span>
                              <span class="n">source_i</span><span class="p">,</span>
                              <span class="n">f0</span><span class="p">,</span>
@@ -1374,7 +1374,7 @@
     <span class="n">mask_y</span> <span class="o">=</span> <span class="n">mask_y</span><span class="o">.</span><span class="n">at</span><span class="p">[:</span><span class="n">pml_width</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
     <span class="n">mask_y</span> <span class="o">=</span> <span class="n">mask_y</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="o">-</span><span class="n">pml_width</span><span class="p">:]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">carry</span><span class="p">,</span> <span class="n">it</span><span class="p">):</span>
         <span class="n">p_prev</span><span class="p">,</span> <span class="n">p_curr</span> <span class="o">=</span> <span class="n">carry</span>
         <span class="n">t</span> <span class="o">=</span> <span class="n">it</span> <span class="o">*</span> <span class="n">dt</span>
 
