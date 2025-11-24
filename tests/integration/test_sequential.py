@@ -1,3 +1,6 @@
+from jax import config as jax_config
+jax_config.update("jax_disable_jit", True)
+jax_config.update("jax_enable_x64", False)  # match your local setup
 import jax.numpy as jnp
 
 def test_sequential_oed():
@@ -42,4 +45,4 @@ def test_sequential_oed():
 
 
 # # Run the test
-test_sequential_oed()
+# test_sequential_oed()
