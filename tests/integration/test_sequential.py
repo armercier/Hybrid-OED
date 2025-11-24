@@ -14,7 +14,7 @@ def test_sequential_oed():
 
     # vstack teh arrays
     J_c = (jnp.vstack(loaded_arrays))
-
+    print("Checksum:", jnp.array(J_c).sum())
     if J_c.shape != (1000, 32768):
         raise ValueError(f"Expected 1000 rows, got {J_c.shape[0]} and 32768 columns, got {J_c.shape[1]}")
     
