@@ -27,7 +27,6 @@ fonttools==4.55.0
 furo==2024.8.6
 git-filter-repo==2.47.0
 h5py==3.14.0
-hybridoed==0.1.0
 idna==3.10
 imagesize==1.4.1
 importlib_metadata==8.5.0
