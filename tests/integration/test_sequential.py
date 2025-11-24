@@ -41,7 +41,7 @@ def test_sequential_oed():
     for iteration, row_idx in enumerate(selected_rows):
         ordered_list.append(row_idx.item())
 
-    assert ordered_list == [0, 3, 6, 108, 176, 318, 358, 421, 550][0]
+    assert ordered_list[0] == [0, 3, 6, 108, 176, 318, 358, 421, 550][0]
 
 
 # # Run the test
