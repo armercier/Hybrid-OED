@@ -493,8 +493,64 @@ and solves the Helmholtz equation using a specified solver.</p>
 </dd></dl>
 
 </section>
-<section id="module-hybridoed">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-hybridoed" title="Link to this heading">¶</a></h2>
+<section id="hybridoed-oed-module">
+<h2>hybridoed.oed module<a class="headerlink" href="#hybridoed-oed-module" title="Link to this heading">¶</a></h2>
+<dl class="py function" id="module-hybridoed.oed">
+<dt class="sig sig-object py" id="hybridoed.oed.eigenvalue_criterion">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.oed.</span></span><span class="sig-name descname"><span class="pre">eigenvalue_criterion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J_o</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/oed.html#eigenvalue_criterion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.oed.eigenvalue_criterion" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the eigenvalue-based selection criterion.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.oed.iterative_selection_no_reselection">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.oed.</span></span><span class="sig-name descname"><span class="pre">iterative_selection_no_reselection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J_c</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_rows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_receivers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">selection_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'single'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/oed.html#iterative_selection_no_reselection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.oed.iterative_selection_no_reselection" title="Link to this definition">¶</a></dt>
+<dd><p>Iteratively build J_o while preventing reselection of rows, allowing for single row or block selection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>J_c</strong> – The comprehensive Jacobian matrix of shape (n, m).</p></li>
+<li><p><strong>num_rows</strong> – Number of rows to select in total.</p></li>
+<li><p><strong>n_freq</strong> – Number of frequency rows per source-receiver pair.</p></li>
+<li><p><strong>n_receivers</strong> – Number of receivers per source.</p></li>
+<li><p><strong>selection_mode</strong> – “single” for single row selection, “block” for source-wise block selection.</p></li>
+<li><p><strong>threshold</strong> – Eigenvalue criterion threshold.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The selected rows forming the optimized Jacobian.
+O_final: Selection vector marking selected rows.
+mask_history: History of active masks during iterations.
+criterion_log: Log of criterion improvements for each row or block.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>J_o_final</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-hybridoed.utils">
+<span id="hybridoed-utils-module"></span><h2>hybridoed.utils module<a class="headerlink" href="#module-hybridoed.utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="hybridoed.utils.plot_specific_jacobian">
+<span class="sig-prename descclassname"><span class="pre">hybridoed.utils.</span></span><span class="sig-name descname"><span class="pre">plot_specific_jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">jacobians</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">src_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rec_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiver_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybridoed/utils.html#plot_specific_jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hybridoed.utils.plot_specific_jacobian" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the real and imaginary parts of a specific Jacobian from a structured array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>jacobians</strong> (<em>array</em>) – Array of shape (n_sources, n_receivers, n_frequencies, rows, cols).</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em>) – List of frequencies corresponding to the third dimension of <cite>jacobians</cite>.</p></li>
+<li><p><strong>src_coords</strong> (<em>list</em>) – List of source coordinates.</p></li>
+<li><p><strong>rec_coords</strong> (<em>array</em>) – Array of receiver coordinates.</p></li>
+<li><p><strong>source_idx</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the source to plot.</p></li>
+<li><p><strong>receiver_idx</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the receiver to plot.</p></li>
+<li><p><strong>frequency_idx</strong> (<em>int</em><em>, </em><em>optional</em>) – Index of the frequency to plot.</p></li>
+<li><p><strong>save_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Path to save the plots. If None, displays them instead.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -562,7 +618,15 @@ and solves the Helmholtz equation using a specified solver.</p>
 <li><a class="reference internal" href="#hybridoed.forward.solve_helmholtz_general"><code class="docutils literal notranslate"><span class="pre">solve_helmholtz_general()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-hybridoed">Module contents</a></li>
+<li><a class="reference internal" href="#hybridoed-oed-module">hybridoed.oed module</a><ul>
+<li><a class="reference internal" href="#hybridoed.oed.eigenvalue_criterion"><code class="docutils literal notranslate"><span class="pre">eigenvalue_criterion()</span></code></a></li>
+<li><a class="reference internal" href="#hybridoed.oed.iterative_selection_no_reselection"><code class="docutils literal notranslate"><span class="pre">iterative_selection_no_reselection()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-hybridoed.utils">hybridoed.utils module</a><ul>
+<li><a class="reference internal" href="#hybridoed.utils.plot_specific_jacobian"><code class="docutils literal notranslate"><span class="pre">plot_specific_jacobian()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
