@@ -12,10 +12,17 @@ hybridoed.forward module
    :undoc-members:
    :show-inheritance:
 
-Module contents
+hybridoed.oed module
 ---------------
 
-.. automodule:: hybridoed
+.. automodule:: hybridoed.oed
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hybridoed.utils module
+-----------------------
+.. automodule:: hybridoed.utils
    :members:
    :undoc-members:
    :show-inheritance:
