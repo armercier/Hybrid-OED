@@ -756,7 +756,7 @@ def acoustic2D_cpml_minmem(velocity,
 
         # ===== source (use ws** that were defined outside) =====
         ricker = (1.0 - 2.0 * a_const * (t - t0)**2) * jnp.exp(-a_const * (t - t0)**2)
-        src = (ricker * dt).astype(jnp.float32)
+        # src = (ricker * dt).astype(jnp.float32)
         src = (dt * src_amp_pa_per_s) * ricker
         p = p.at[i0,   j0  ].add(ws00 * src)
         p = p.at[i0+1, j0  ].add(ws10 * src)
@@ -768,6 +768,11 @@ def acoustic2D_cpml_minmem(velocity,
         if receiver_is is not None:
             sx_rec = receiver_is[:, 0]
             sy_rec = receiver_is[:, 1]
+            
+            # cell-centered velocities (nx, ny)
+            vx_c = 0.5 * (vx[:-1, :] + vx[1:, :])
+            vy_c = 0.5 * (vy[:, :-1] + vy[:, 1:])
+
             i0r = jnp.clip(jnp.floor(sx_rec).astype(jnp.int32), 0, nx-2)
             j0r = jnp.clip(jnp.floor(sy_rec).astype(jnp.int32), 0, ny-2)
             dir_ = sx_rec - i0r
@@ -782,6 +787,13 @@ def acoustic2D_cpml_minmem(velocity,
             wr10 = dir_    *(1-djr_)
             wr01 = (1-dir_)*djr_
             wr11 = dir_    *djr_
+
+            # v00 = vy_c[i0r,   j0r  ]
+            # v10 = vy_c[i0r+1, j0r  ]
+            # v01 = vy_c[i0r,   j0r+1]
+            # v11 = vy_c[i0r+1, j0r+1]
+            # vy_rec = wr00*v00 + wr10*v10 + wr01*v01 + wr11*v11
+            # out.append(vy_rec)
 
             rec_vals = wr00*v00 + wr10*v10 + wr01*v01 + wr11*v11
             out.append(rec_vals)
