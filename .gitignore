@@ -162,3 +162,8 @@ cython_debug/
 # eegdevtest files
 *.pb
 *.gz
+
+# pdf, gif and png files
+*.pdf
+*.gif
+*.png

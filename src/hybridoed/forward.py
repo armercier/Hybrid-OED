@@ -1,3 +1,4 @@
+from __future__ import annotations
 import jax.numpy as jnp
 from jwave import FourierSeries
 from jwave.geometry import Domain
@@ -6,7 +7,9 @@ from jwave.acoustics.time_harmonic import helmholtz_solver
 from jwave.geometry import Domain, Medium
 import jax
 from jax import jit, lax
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
+import warnings
+
 
 
 
@@ -303,6 +306,11 @@ def acoustic2D(velocity,
                output_wavefield=True,
                ):
     """Simulate seismic waves through a 2D velocity model"""
+    warnings.warn(
+        "acoustic2D is deprecated. Use acoustic2D_pml or acoustic2D_cpml_minmem_strips_diff instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
 
     assert density.shape == velocity.shape
     nx, ny = velocity.shape
@@ -360,6 +368,7 @@ def acoustic2D(velocity,
     _, y = lax.scan(step, (pressure_past, pressure_present), jnp.arange(n_steps))
 
     return y
+
 
 def acoustic2D_pml(velocity,
                    density,
@@ -461,6 +470,12 @@ def acoustic2D_pml_minmem(velocity,
     This version stores only two time‐levels and uses 1D PML profiles,
     avoiding a full 2D sigma array. It also allows dropping the wavefield
     output to save memory if only receiver traces are needed.
+
+    This implements a simple PML with a quadratic ramp and no auxiliary 
+    memory variables, which is less accurate than a full CPML but more memory efficient.
+
+    This is the standard used to generate the seminar results 
+
     """
     nx, ny = velocity.shape
     assert density.shape == velocity.shape
@@ -665,6 +680,14 @@ def acoustic2D_cpml_minmem(velocity,
       - vy at y-faces (i, j+1/2) -> shape (nx, ny+1)
 
     CPML uses separate 1-D profiles on faces/centers per axis.
+
+    This is a more complex implementation than the simple PML version, but it should
+    provide better absorption with fewer PML cells, and is more representative of what’s
+    used in seismic modeling. The source is injected as a force term in the pressure 
+    update, scaled according to seismicCPML conventions. Receiver traces are bilinearly 
+    interpolated at float positions.
+
+    This solver can be used to benchmark but as generally higher memory and compute cost
     """
     nx, ny = velocity.shape
     assert density.shape == velocity.shape
@@ -709,9 +732,10 @@ def acoustic2D_cpml_minmem(velocity,
     ax_c = coeff_x_centers ; ay_c = coeff_y_centers
 
     # Source (Ricker) constants
-    t0     = (1.2 / f0)
+    t0     = (1.2 / f0)*1.5
     a_const= (jnp.pi * f0)**2
     # --- source bilinear weights (distinct names) ---
+    # print(f"source_i: {source_i}")
     sx_f, sy_f = source_i
     i0 = jnp.clip(jnp.floor(sx_f).astype(jnp.int32), 0, nx-2)
     j0 = jnp.clip(jnp.floor(sy_f).astype(jnp.int32), 0, ny-2)
@@ -809,7 +833,7 @@ def acoustic2D_cpml_minmem(velocity,
     return ys
 
 
-# ---------- helper: CPML coeffs with alpha=0 in interior ----------
+# ---------- helper: for the deprecated  acoustic2D_cpml_minmem_strips_diff function below ----------
 def _cpml_1d_fixed(n, dx, dt, pml_width, c_ref, f0,
                    R=1e-6, m=3, kappa_max=3.0, alpha_max=None):
     if alpha_max is None:
@@ -855,7 +879,6 @@ def _store_bf16_bwd(res, g):
     return (lax.convert_element_type(g, jnp.float32),)
 _store_bf16.defvjp(_store_bf16_fwd, _store_bf16_bwd)
 
-# ---------- the differentiable, strip-only CPML ----------
 def acoustic2D_cpml_minmem_strips_diff(
     velocity,
     density,
@@ -873,6 +896,12 @@ def acoustic2D_cpml_minmem_strips_diff(
     src_amp_pa_per_s=3e8,
     use_bfloat16=False,
 ):
+    warnings.warn(
+        "acoustic2D_cpml_minmem_strips_diff is deprecated. Use acoustic2D_cpml_minmem instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    
     nx, ny = velocity.shape
     rho = density.astype(jnp.float32)
     c   = velocity.astype(jnp.float32)
@@ -1160,3 +1189,209 @@ def acoustic2D_pml_4th_minmem(velocity,
     # Run the time loop
     (_, _), ys = lax.scan(step, (p_nm1, p_n), jnp.arange(n_steps))
     return ys
+
+
+
+
+
+Array = jnp.ndarray
+
+def cfl_dt(c: Array, spacing: Tuple[float, ...], cfl: float = 0.45) -> float:
+    """
+    Conservative dt for explicit 2nd-order wave equation in D dims on possibly nonuniform grid.
+    dt <= cfl / (cmax * sqrt(sum_i 1/dx_i^2)).
+    """
+    cmax = float(jnp.max(c))
+    inv_sq_sum = 0.0
+    for h in spacing:
+        inv_sq_sum += 1.0 / (h * h)
+    return cfl / (cmax * (inv_sq_sum ** 0.5))
+
+def laplacian_nd(phi: Array, spacing: tuple[float, ...]) -> Array:
+    """
+    2nd-order centered Laplacian with edge padding (Neumann-ish).
+    Correct shape handling for ND arrays.
+    """
+    ndim = phi.ndim
+    assert ndim == len(spacing)
+
+    out = jnp.zeros_like(phi)
+    for axis, h in enumerate(spacing):
+        pad_config = [(0, 0)] * ndim
+        pad_config[axis] = (1, 1)
+        p = jnp.pad(phi, pad_config, mode="edge")
+
+        slc_c = [slice(None)] * ndim
+        slc_m = [slice(None)] * ndim
+        slc_p = [slice(None)] * ndim
+
+        slc_c[axis] = slice(1, -1)
+        slc_m[axis] = slice(0, -2)
+        slc_p[axis] = slice(2, None)
+
+        phi_c = p[tuple(slc_c)]
+        phi_m = p[tuple(slc_m)]
+        phi_p = p[tuple(slc_p)]
+
+        out = out + (phi_p - 2.0 * phi_c + phi_m) / (h * h)
+
+    return out
+
+def bilinear_sample_2d(field: Array, xy: Array) -> Array:
+    """
+    field: (nx, ny)
+    xy: (N, 2) in *index coordinates* (float), i.e. x is i index, y is j index.
+    Returns (N,)
+    """
+    nx, ny = field.shape
+    x = xy[:, 0]
+    y = xy[:, 1]
+
+    i0 = jnp.clip(jnp.floor(x).astype(jnp.int32), 0, nx - 2)
+    j0 = jnp.clip(jnp.floor(y).astype(jnp.int32), 0, ny - 2)
+    di = x - i0
+    dj = y - j0
+
+    f00 = field[i0,     j0    ]
+    f10 = field[i0 + 1, j0    ]
+    f01 = field[i0,     j0 + 1]
+    f11 = field[i0 + 1, j0 + 1]
+
+    w00 = (1 - di) * (1 - dj)
+    w10 = di       * (1 - dj)
+    w01 = (1 - di) * dj
+    w11 = di       * dj
+    return w00 * f00 + w10 * f10 + w01 * f01 + w11 * f11
+
+def grad_phi_at_receivers_2d(phi: Array, spacing: Tuple[float, float], rec_xy: Array) -> Tuple[Array, Array]:
+    """
+    Compute u = ∇phi at receiver points (2D) using centered differences on grid,
+    then bilinear sample.
+    Returns (ux_rec, uy_rec), each (N,).
+    """
+    dx, dy = spacing
+
+    # centered differences on grid (cell-centered)
+    # pad edges with edge values
+    p = jnp.pad(phi, ((1, 1), (1, 1)), mode="edge")
+    dphidx = (p[2:, 1:-1] - p[:-2, 1:-1]) / (2.0 * dx)
+    dphidy = (p[1:-1, 2:] - p[1:-1, :-2]) / (2.0 * dy)
+
+    ux = bilinear_sample_2d(dphidx, rec_xy)
+    uy = bilinear_sample_2d(dphidy, rec_xy)
+    return ux, uy
+
+def make_sponge_mask(shape: Tuple[int, ...], width: int, strength: float = 0.015) -> Array:
+    """
+    Simple exponential sponge (not CPML). Multiplies phi each step near edges.
+    strength ~ 0.01..0.05 depending on dt and how aggressive you want it.
+    """
+    ndim = len(shape)
+    grids = [jnp.arange(n) for n in shape]
+
+    mask = jnp.ones(shape, dtype=jnp.float32)
+    for ax, n in enumerate(shape):
+        idx = grids[ax].astype(jnp.float32)
+
+        d_left  = jnp.clip(width - idx, a_min=0.0)
+        d_right = jnp.clip(idx - (n - 1 - width), a_min=0.0)
+        d = jnp.maximum(d_left, d_right)  # 0 interior, 1..width in sponge
+        # smooth ramp -> exp(-strength * (d/width)^2)
+        ramp = (d / jnp.maximum(width, 1.0)) ** 2
+        one_d = jnp.exp(-strength * ramp).astype(jnp.float32)
+
+        # broadcast along axis
+        reshape = [1] * ndim
+        reshape[ax] = n
+        mask = mask * one_d.reshape(reshape)
+
+    return mask
+
+@jax.jit
+def solve_phi_wave_2d(
+    c: Array,                         # (nx, ny) velocity [m/s]
+    rho: Optional[Array],             # (nx, ny) density [kg/m^3] or None -> rho=1
+    spacing: Tuple[float, float],     # (dx, dy) [m]
+    dt: float,                        # [s]
+    source_xy: Array,                 # (2,) float indices (i,j)
+    source_wavelet: Array,            # (nt,) arbitrary amplitude (interpreted as forcing)
+    receiver_xy: Array,               # (nrec,2) float indices (i,j)
+    sponge_mask: Optional[Array] = None,  # (nx,ny) or None
+) -> Dict[str, Array]:
+    """
+    2D velocity-potential wave equation:
+        d2phi/dt2 = c^2 * Laplacian(phi) + s
+    Derived quantities at receivers:
+        u = grad(phi)
+        p = -rho * dphi/dt
+
+    Memory-lean: stores only phi_{n-1}, phi_n.
+
+    Notes on units:
+    - This is a generic wave solver. The mapping of your wavelet to physical units depends
+      on how you define the forcing term s.
+    """
+    nx, ny = c.shape
+    if rho is None:
+        rho = jnp.ones_like(c, dtype=jnp.float32)
+    c2 = (c.astype(jnp.float32) ** 2)
+
+    # init fields
+    phi_nm1 = jnp.zeros((nx, ny), dtype=jnp.float32)
+    phi_n   = jnp.zeros((nx, ny), dtype=jnp.float32)
+
+    # source bilinear weights (cell-centered injection)
+    sx, sy = source_xy[0], source_xy[1]
+    i0 = jnp.clip(jnp.floor(sx).astype(jnp.int32), 0, nx - 2)
+    j0 = jnp.clip(jnp.floor(sy).astype(jnp.int32), 0, ny - 2)
+    di = sx - i0
+    dj = sy - j0
+    ws00 = (1 - di) * (1 - dj)
+    ws10 = di       * (1 - dj)
+    ws01 = (1 - di) * dj
+    ws11 = di       * dj
+
+    dt2 = jnp.array(dt * dt, dtype=jnp.float32)
+    dx, dy = spacing
+
+    def step(carry, it):
+        phi_prev, phi_curr = carry
+
+        # interior update
+        lap = laplacian_nd(phi_curr, (dx, dy))
+        phi_next = (2.0 * phi_curr - phi_prev) + dt2 * (c2 * lap)
+
+        # add source forcing (interpreting wavelet[it] as s(t))
+        s = source_wavelet[it].astype(jnp.float32)
+        phi_next = phi_next.at[i0,     j0    ].add(ws00 * dt2 * s)
+        phi_next = phi_next.at[i0 + 1, j0    ].add(ws10 * dt2 * s)
+        phi_next = phi_next.at[i0,     j0 + 1].add(ws01 * dt2 * s)
+        phi_next = phi_next.at[i0 + 1, j0 + 1].add(ws11 * dt2 * s)
+
+        # optional sponge (simple absorber)
+        if sponge_mask is not None:
+            phi_next = phi_next * sponge_mask
+
+        # derived QoIs at receivers
+        # time derivative at n (centered): dphi/dt ≈ (phi_next - phi_prev)/(2dt)
+        dphi_dt = (phi_next - phi_prev) / (2.0 * dt)
+        # pressure at receivers: p = -rho * dphi/dt
+        p_grid = -rho * dphi_dt
+
+        phi_rec = bilinear_sample_2d(phi_next, receiver_xy)
+        p_rec   = bilinear_sample_2d(p_grid,  receiver_xy)
+
+        ux_rec, uy_rec = grad_phi_at_receivers_2d(phi_next, (dx, dy), receiver_xy)
+
+        out = (phi_rec, p_rec, ux_rec, uy_rec)
+        return (phi_curr, phi_next), out
+
+    (_, _), ys = lax.scan(step, (phi_nm1, phi_n), jnp.arange(source_wavelet.shape[0], dtype=jnp.int32))
+    phi_rec, p_rec, ux_rec, uy_rec = ys
+
+    return {
+        "phi_rec": phi_rec,  # (nt, nrec)
+        "p_rec":   p_rec,    # (nt, nrec)
+        "ux_rec":  ux_rec,   # (nt, nrec)
+        "uy_rec":  uy_rec,   # (nt, nrec)
+    }
