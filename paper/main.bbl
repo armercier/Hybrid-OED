@@ -1,0 +1,112 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bekas et~al.(2007)Bekas, Kokiopoulou, and Saad]{bekas2007diagonal}
+Costas Bekas, Effrosyni Kokiopoulou, and Yousef Saad.
+\newblock An estimator for the diagonal of a matrix.
+\newblock \emph{Applied Numerical Mathematics}, 57\penalty0 (11--12):\penalty0
+  1214--1229, 2007.
+\newblock \doi{10.1016/j.apnum.2007.01.003}.
+
+\bibitem[Castro and De~los Reyes(2020)]{castro2020observation}
+Paula Castro and Juan~Carlos De~los Reyes.
+\newblock A bilevel learning approach for optimal observation placement in
+  variational data assimilation.
+\newblock \emph{Inverse Problems}, 36\penalty0 (3):\penalty0 035020, 2020.
+\newblock \doi{10.1088/1361-6420/ab4bfa}.
+
+\bibitem[Darges et~al.(2025)Darges, Maboudi~Afkham, and Chung]{darges2025node}
+John~E. Darges, Babak Maboudi~Afkham, and Matthias Chung.
+\newblock Neural optimal design of experiment for inverse problems.
+\newblock \emph{arXiv preprint arXiv:2512.23763}, 2025.
+
+\bibitem[Downing et~al.(2026)Downing, Gazzola, Graham, and
+  Spence]{downing2026bilevel}
+Shaunagh Downing, Silvia Gazzola, Ivan~G. Graham, and Euan~A. Spence.
+\newblock Optimising seismic imaging design parameters via bilevel learning.
+\newblock \emph{arXiv preprint arXiv:2301.10762}, 2026.
+
+\bibitem[Hemachandra et~al.(2025)Hemachandra, Lau, Ng, and
+  Low]{hemachandra2025pied}
+Apivich Hemachandra, Gregory Kang~Ruey Lau, See-Kiong Ng, and Bryan Kian~Hsiang
+  Low.
+\newblock {PIED}: Physics-informed experimental design for inverse problems.
+\newblock In \emph{International Conference on Learning Representations}, 2025.
+\newblock URL \url{https://openreview.net/forum?id=wasBnwB8lP}.
+
+\bibitem[Holler et~al.(2018)Holler, Kunisch, and Barnard]{holler2018bilevel}
+Gernot Holler, Karl Kunisch, and Richard~C. Barnard.
+\newblock A bilevel approach for parameter learning in inverse problems.
+\newblock \emph{Inverse Problems}, 34\penalty0 (11):\penalty0 115012, 2018.
+\newblock \doi{10.1088/1361-6420/aade77}.
+
+\bibitem[Krampe et~al.(2021)Krampe, Edme, and Maurer]{krampe2021oed}
+Val{\'e}rie Krampe, Pascal Edme, and Hansruedi Maurer.
+\newblock Optimized experimental design for seismic full waveform inversion: A
+  computationally efficient method including a flexible implementation of
+  acquisition costs.
+\newblock \emph{Geophysical Prospecting}, 69\penalty0 (1):\penalty0 152--166,
+  2021.
+\newblock \doi{10.1111/1365-2478.13040}.
+
+\bibitem[Liu et~al.(2025)Liu, Peng, Zhang, Zhao, Zhou, Yao, and
+  Chen]{liu2025dspo}
+Xu~Liu, Wei Peng, Xiaoya Zhang, Xiaoyu Zhao, Weien Zhou, Wen Yao, and Xiaoqian
+  Chen.
+\newblock Enhancing deep learning-based field reconstruction with a
+  differentiable learning framework.
+\newblock \emph{Nature Machine Intelligence}, 7:\penalty0 1129--1140, 2025.
+\newblock \doi{10.1038/s42256-025-01063-1}.
+
+\bibitem[Maurer et~al.(2017)Maurer, Nuber, Korta~Martiartu, Reiser, Boehm,
+  Manukyan, Schmelzbach, and Fichtner]{maurer2017oed}
+Hansruedi Maurer, Andr{\'e} Nuber, Naiara Korta~Martiartu, Fabienne Reiser,
+  Christian Boehm, Edgar Manukyan, C{\'e}dric Schmelzbach, and Andreas
+  Fichtner.
+\newblock Optimized experimental design in the context of seismic full waveform
+  inversion and seismic waveform imaging.
+\newblock \emph{Advances in Geophysics}, 58:\penalty0 1--45, 2017.
+\newblock \doi{10.1016/bs.agph.2017.10.001}.
+
+\bibitem[Mercier et~al.(2025)Mercier, Boehm, and Maurer]{mercier2025combined}
+Arnaud Mercier, Christian Boehm, and Hansruedi Maurer.
+\newblock Designing full waveform inverse problems: A combined data and model
+  approach.
+\newblock \emph{Geophysical Journal International}, 241\penalty0 (3):\penalty0
+  1479--1494, 2025.
+\newblock \doi{10.1093/gji/ggaf117}.
+
+\bibitem[Stanziola et~al.(2023)Stanziola, Arridge, Cox, and
+  Treeby]{stanziola2023jwave}
+Antonio Stanziola, Simon~R. Arridge, Ben~T. Cox, and Bradley~E. Treeby.
+\newblock j-wave: An open-source differentiable wave simulator.
+\newblock \emph{SoftwareX}, 22:\penalty0 101338, 2023.
+\newblock \doi{10.1016/j.softx.2023.101338}.
+
+\bibitem[Thomsen et~al.(2024)Thomsen, Van~Manen, Baettig, Brauner, Gebraad, and
+  Boehm]{Thomsen2024}
+Henrik~R. Thomsen, Dirk-Jan Van~Manen, Sabrina Baettig, Christian Brauner, Lars
+  Gebraad, and Christian Boehm.
+\newblock The {W}-{Scan}: leveraging guided waves to create digital twins for
+  non- destructive evaluation of composite materials.
+\newblock Brugg-Windisch, October 2024.
+
+\bibitem[Virieux and Operto(2009)]{virieux2009overview}
+Jean Virieux and St{\'e}phane Operto.
+\newblock An overview of full-waveform inversion in exploration geophysics.
+\newblock \emph{Geophysics}, 74\penalty0 (6):\penalty0 WCC1--WCC26, 2009.
+\newblock \doi{10.1190/1.3238367}.
+
+\bibitem[Zuo and Huthwaite(2022)]{zuo2022quantitative}
+Peng Zuo and Peter Huthwaite.
+\newblock Quantitative mapping of thickness variations along a ray path using
+  geometrical full waveform inversion and guided wave mode conversion.
+\newblock \emph{Proceedings of the Royal Society A: Mathematical, Physical and
+  Engineering Sciences}, 478\penalty0 (2257):\penalty0 20210602, 2022.
+\newblock \doi{10.1098/rspa.2021.0602}.
+
+\end{thebibliography}

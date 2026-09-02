@@ -1,0 +1,51 @@
+\section{Discussion and limitations}
+
+The experiments show that differentiable OED can improve continuous receiver
+placement for a finite nonlinear inversion. More broadly, the approach addresses
+one source of misspecification in practical FWI: the acquisition geometry must
+usually be chosen before the informative measurement locations are known. By
+alternating inversion, receiver updates, and reacquisition, the proposed loop
+can adapt an initially suboptimal geometry as information about the model
+emerges.
+
+The three design objectives should be viewed as different compromises rather than a
+definitive ranking. The oracle model error design objective is a privileged reference that is unavailable in a physical experiment. Illumination
+currently approaches the oracle’s mean reconstruction benefit at lower computational
+cost, but with greater variation across repetitions. Waveform misfit is less
+variable but gives a smaller mean improvement. The waveform misfit objective assumes that receiver layouts producing a better data fit after a finite FWI block also produce velocity models closer to the true model. This assumption is not guaranteed in a nonlinear, ill-posed inverse problem.
+
+The present conclusions are limited to noise-free synthetic observations
+generated with the same solver used for inversion. Robustness to measurement
+noise and modeling error therefore remains untested. Moreover, the methods are
+matched by their number of FWI updates rather than by total computational or
+physical acquisition cost, and the learned layouts depend on the chosen
+optimizers and update budgets. Future work should evaluate independent forward
+models, LDV-calibrated noise, fixed acquisition budgets, and ultimately
+closed-loop laboratory measurements.
+
+% Illumination avoids differentiation through the unrolled FWI trajectory,
+% substantially reducing runtime and peak memory. Its scaling to longer
+% trajectories remains untested, and larger problems may require checkpointing,
+% truncated unrolling, or implicit gradients.
+
+% The methods are matched by 100 FWI updates rather than total computation or
+% physical acquisition time. Future LDV studies should instead compare
+% reconstruction quality under fixed acquisition and computational budgets.
+
+% The observations are noise-free and generated with the same solver used for
+% inversion, so robustness to noise and modeling error remains untested. Future
+% evaluations should use LDV-calibrated noise, an independent forward model, and
+% ultimately closed-loop laboratory acquisition.
+
+Overall, the results support differentiable acquisition as a flexible way to
+decide not only how to reconstruct a model, but also where the data needed for
+that reconstruction should be measured. The present approach provides also an exciting route for
+investigating which hyperparameters, optimizers, and wave solvers could
+themselves become optimization variables.
+
+
+
+
+
+% The optimized layouts also depend on the chosen optimizer and update budget;
+% these choices could themselves become optimization variables.

@@ -1,0 +1,127 @@
+\section{Differentiable acquisition design}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/differentiable-oed-double-loop-draft_ipnut_output.pdf}
+  \caption{Nested differentiable OED. The inputs to the outer design loop are the initial receiver positions and initial velocity model. At outer design iteration $t$, measurements at
+$\vect{p}^t$ drive $K$ FWI updates; the design objective then updates the
+receivers to $\vect{p}^{t+1}$, where data are reacquired. The outputs of this workflow are the updated receiver positions and the corresponding reconstructed models. Red crosses denote fixed sources and yellow stars denote movable
+  receivers.}
+  \label{fig:diff-oed-workflow}
+\end{figure}
+
+\subsection{Full-waveform inversion}
+
+Figure~\ref{fig:diff-oed-workflow} shows the bilevel structure of the workflow. The two optimization levels are indexed separately: $t$
+indexes iterations of the outer design loop, and $k$ indexes FWI updates. Let
+$\vect{m}$ denote the discretized velocity model,
+$\vect{p}\in\mathbb{R}^{2N_r}$ the continuous receiver coordinates of $N_r$ receivers,
+and $\mathcal{F}_{\vect{p}}(\vect{m})$ the time-domain acoustic forward
+operator sampled at those coordinates. Let $\mathcal{U}_{m}$ denote the FWI
+optimizer. For predicted data
+$\vect{d}^{\mathrm{pred}}=\mathcal{F}_{\vect{p}}(\vect{m})$, the data misfit is
+the mean squared error between observed and predicted waveforms,
+\begin{equation}\label{eq:fwi_loss}
+  \Ldata(\vect{d}^{\mathrm{pred}},\vect{d}^{\mathrm{obs}})
+  = \left\|\vect{d}^{\mathrm{pred}}-\vect{d}^{\mathrm{obs}}\right\|_2^2.
+\end{equation}
+
+At outer design iteration $t$, the geometry is
+$\vect{p}^{t}$ and the corresponding observed waveforms are
+$\vect{d}^{\mathrm{obs}}(\vect{p}^{t})$. Starting from $\vect{m}_0^{t}$, $K$
+steps of FWI produce
+\begin{align}
+  \vect{m}_{k+1}^{t}
+  &= \mathcal{U}_{m}\!\left(
+     \vect{m}_k^{t},
+     \nabla_{\vect{m}}\Ldata\!\left(
+       \mathcal{F}_{\vect{p}^{t}}\!\left(
+         \vect{m}_k^{t}
+       \right),
+       \vect{d}^{\mathrm{obs}}(\vect{p}^{t})
+     \right)
+  \right),
+  \qquad k=0,\ldots,K-1,
+  \label{eq:fwi-update}
+\end{align}
+The latest velocity model is carried over to the next outer design iteration,
+such that $\vect{m}_0^{t+1}=\vect{m}_K^{t}$. The complete workflow is differentiable and uses automatic differentiation to compute the FWI gradients as well as the outer design gradients.
+
+\subsection{Interchangeable design objectives}
+
+Here, we present the three design objectives used in this study. Each objective
+uses the current receiver coordinates $\vect{p}^{t}$ and the corresponding
+reconstruction state defined below. The objectives are interchangeable, and the
+same workflow can be used to compare their performance.
+
+\paragraph{Oracle model error.}
+For synthetic validation, the privileged objective directly measures
+reconstruction quality against the true model $\vect{m}^{\star}$,
+\begin{equation}
+  \mathcal{L}_{\mathrm{model}}(\vect{p}^{t})
+  = \left\|\vect{m}_K^{t}-\vect{m}^{\star}\right\|_2^2.
+\end{equation}
+It provides an upper benchmark but is unavailable in a physical experiment.
+
+\paragraph{Waveform misfit.}
+Let $\vect{d}^{\mathrm{obs}}(\vect{p})$ denote measurements acquired after the
+receivers have moved to $\vect{p}$. We evaluate the reconstructed model using
+the same acquisition geometry:
+\begin{equation}
+  \mathcal{L}_{\mathrm{wave}}(\vect{p}^{t})
+  = \left\|\mathcal{F}_{\vect{p}^{t}}
+  \!\left(\vect{m}_K^{t}\right)
+  -\vect{d}^{\mathrm{obs}}(\vect{p}^{t})\right\|_2^2.
+  \label{eq:waveform}
+\end{equation}
+This objective does not require the unknown true material model. Because the
+waveform misfit is evaluated at a different acquisition geometry at every
+outer design iteration, its values across design iterations are not expected to
+decrease monotonically.
+
+\paragraph{Stochastic illumination.}
+The illumination objective scores a receiver geometry by how strongly and how
+uniformly the simulated data respond to perturbations throughout the model.
+It uses the diagonal of the local Gauss--Newton matrix $J^\top J$, where
+$J=\partial\mathcal{F}_{\vect{p}}(\vect{m})/\partial\vect{m}$ is evaluated at
+the current reconstructed model. Large diagonal entries indicate model
+locations to which the acquisition is locally sensitive. We estimate this
+diagonal with random probes and vector--Jacobian products, so the full Jacobian
+and Gauss--Newton matrix are never formed. The loss penalizes spatial
+nonuniformity while rewarding a large mean sensitivity. This criterion requires neither the true model nor observed
+waveforms. Appendix~\ref{app:illumination-derivation} derives the estimator and
+gives the exact scalarization; its numerical settings are listed in
+Table~\ref{tab:outer-design-parameters}.
+
+\subsection{Design update and differentiation paths}
+
+Let $\Ldesign$ denote one of the three objectives above and $\mathcal{U}_{p}$
+the coordinate optimizer. The receiver-coordinate update is
+\begin{equation}
+  \vect{p}^{t+1}
+  = \mathcal{U}_{p}\!\left(
+       \vect{p}^{t},
+       \nabla_{\vect{p}}\Ldesign(\vect{p}^{t})
+     \right),
+  \label{eq:design-update}
+\end{equation}
+The objectives induce two different differentiation paths. For the oracle
+model error and waveform misfit
+objectives, reverse-mode automatic differentiation propagates the
+receiver-coordinate gradient through the complete unrolled FWI algorithm,
+including all $K$ FWI updates and their wave simulations. By contrast, the
+illumination gradient is differentiated through the forward wave solver and
+its vector--Jacobian products, but not through the FWI trajectory.  Illumination therefore reduces the additional graph required to
+calculate the design update. All methods
+still perform $K$ FWI updates to advance the reconstruction between design
+iterations. We implement the workflow in JAX using a differentiable wave solver
+in the spirit of j-Wave~\citep{stanziola2023jwave}.
+
+We do not assume that the inner FWI problem is fully converged. Instead, the
+$K$ updates in Eq.~\eqref{eq:fwi-update} define the reconstruction presented to
+the outer objective, so the design is optimized for a given number of FWI
+updates. We fix $K$ in this study. In future, the inversion budget $K$, or a
+learned stopping rule based on the level of convergence, could itself be
+optimized. In this finite-iteration formulation, the chosen optimizer and
+stopping point are hyperparameters, and retaining the updates determines the
+memory cost of differentiation.

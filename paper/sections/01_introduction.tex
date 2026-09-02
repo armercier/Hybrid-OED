@@ -1,0 +1,48 @@
+\section{Introduction}
+
+Full-waveform inversion reconstructs material properties by repeatedly solving a wave equation and minimizing waveform mismatch~\citep{virieux2009overview}. Its reconstruction quality depends strongly on where sources and receivers are placed, yet measurements and wave simulations are expensive. Optimal experimental design (OED) therefore seeks a small, informative acquisition geometry. In seismic FWI, established methods typically compute sensitivities for a comprehensive candidate survey and greedily select measurements according to spectral or resolution criteria derived from the Gauss--Newton system~\citep{maurer2017oed,krampe2021oed,mercier2025combined}. These approaches are effective, but they require a discrete candidate set, often use greedy selection strategies that can lead to suboptimal designs, and optimize a proxy rather than the actual nonlinear reconstruction outcome.
+
+Differentiable simulators allow a different formulation: treat acquisition
+coordinates as continuous variables and optimize them jointly with the FWI workflow. Bilevel learning has been used to select
+regularization parameters in inverse problems~\citep{holler2018bilevel} and to
+place space--time observations in variational data
+assimilation~\citep{castro2020observation}. Related differentiable experimental
+design methods use physics-informed or neural
+reconstructors~\citep{hemachandra2025pied,darges2025node,liu2025dspo}. Most
+closely, \citet{downing2026bilevel} optimizes sensor coordinates for
+frequency-domain FWI using supervised bilevel learning, implicit upper-level
+gradients, and training velocity models. Our aim is complementary: we study an outer design loop in which the design objective itself is
+interchangeable. We compare an oracle design objective, which requires the true velocity model, with practical and less expensive alternatives.
+
+
+Our application is motivated by guided-wave thickness mapping and scanning laser
+Doppler vibrometry (LDV). Previous work has shown that FWI can reconstruct plate thickness from guided-wave measurements~\citep{zuo2022quantitative}, making it relevant to non-destructive testing of thin structures such as plates. LDV enables
+highly flexible receiver placement, but a measurement at each spatial position must be repeated many times and stacked to improve its signal-to-noise ratio~\citep{Thomsen2024}.
+Acquisition time therefore grows quickly with the number of positions, strongly motivating OED for a reduced acquisition
+layout.
+
+This motivates an outer design loop for online acquisition rather than a
+single layout designed before the experiment. In practice, the LDV
+first measures the wavefield at the current receiver coordinates. A short block of FWI is then performed. The selected design objective uses that partially
+updated velocity model to calculate new receiver coordinates. The LDV then moves to
+those coordinates, acquires a new stacked data set, and the loop repeats. All
+design objectives studied below are embedded in this same outer design loop.
+Figure~\ref{fig:diff-oed-workflow} illustrates its
+measurement--inversion--design--reacquisition sequence.
+
+% This study presents a proof of concept with three main contributions:
+% \begin{itemize}
+%   \item a fully differentiable acquisition and acoustic FWI workflow that optimizes continuous receiver coordinates;
+%   \item a comparison of an oracle model error design objective with a waveform misfit objective and a stochastic illumination objective in the same computational framework; and
+%   \item preliminary evidence that the compared objectives improve reconstruction in a synthetic non-destructive testing setting.
+% \end{itemize}
+
+Our contributions are a differentiable acoustic FWI workflow for continuous
+receiver placement, a comparison of oracle model error, waveform misfit, and stochastic
+illumination objectives, and a synthetic demonstration that each improves
+reconstruction.
+
+% More broadly, differentiating the complete acquisition and inversion workflow
+% makes its components modular: expensive solver or reconstruction components
+% could in principle be replaced by learned surrogates, while internal
+% algorithmic hyperparameters could be optimized jointly with the acquisition geometry. This study does not yet explore these possibilities.
