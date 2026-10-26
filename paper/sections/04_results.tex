@@ -1,0 +1,57 @@
+\section{Preliminary results}
+
+We compare the fixed layout with layouts optimized using the oracle model
+error, waveform misfit, and illumination objectives. The primary metric is the mean squared model error (MSE) over the complete grid. The multi-seed protocol holds the true and initial models fixed while varying the paired receiver initialization and stochastic FWI source sequence.
+
+% Across ten paired repetitions, every optimized layout reduces final model MSE
+% relative to its fixed-layout baseline (Table~\ref{tab:multiseed-summary}). The
+% oracle and illumination objectives give mean gains of $18.6\%$ and $16.7\%$,
+% respectively, with illumination showing greater variability. Illumination also has the lowest runtime and memory usage, with a mean runtime of \(356.5\,\mathrm{s}\) and a mean peak memory increase of \(9.8\,\mathrm{GiB}\), compared with \(479.2\,\mathrm{s}\) and \(64.3\,\mathrm{GiB}\) for oracle model error and \(503.1\,\mathrm{s}\) and \(66.1\,\mathrm{GiB}\) for waveform misfit. Waveform misfit
+% gives a smaller mean gain of $9.4\%$ but the lowest variability. Individual repetitions are
+% shown in Appendix Fig.~\ref{fig:paired-improvement}. An illustrative
+% reconstruction is shown in Fig.~\ref{fig:reconstruction-comparison}, and the
+% corresponding receiver trajectories appear in Appendix
+% Fig.~\ref{fig:receiver-trajectories}. The reconstruction using the oracle model error is also shown in Appendix Fig.~\ref{fig:reconstruction-comparison-oracle}.
+
+Across ten paired repetitions, every optimized layout reduces final model MSE
+relative to its fixed-layout baseline (Table~\ref{tab:multiseed-summary}).
+Oracle and illumination give the largest mean improvements, while illumination
+requires substantially less runtime and memory than the objectives
+differentiated through FWI. Waveform misfit gives a smaller
+but less variable improvement. Figure~\ref{fig:reconstruction-comparison} shows
+one representative reconstruction; individual repetitions and receiver
+trajectories are reported in the Appendix.
+
+
+\begin{table}[!htbp]
+  \centering
+  \scriptsize
+  \setlength{\tabcolsep}{3.5pt}
+  \caption{Multi-seed reconstruction and runtime summary. Values are
+  mean $\pm$ sample standard deviation; improvements are relative to the paired
+  fixed-layout run. Peak memory increase is reported as a mean rounded to
+  $0.1\,\mathrm{GiB}$. Every reconstruction uses 100 FWI updates.}
+  \label{tab:multiseed-summary}
+  \begin{tabular}{@{}lrrrrr@{}}
+    \toprule
+    Method & Final model MSE & Improvement (\%) & Improved & Runtime (s) & Peak $\Delta$Memory (GiB) \\
+    \midrule
+    Fixed layout & $3358.9\pm65.5$ & $0.0$ & - & $166.3\pm0.9$ & 1.2 \\
+    Stochastic illumination & $2796.2\pm274.6$ & $16.7\pm8.6$ & 10/10 & $356.5\pm0.8$ & 9.8 \\
+    Waveform misfit & $3041.6\pm125.4$ & $9.4\pm4.3$ & 10/10 & $503.1\pm0.7$ & 66.1 \\
+    Oracle model error & $2732.3\pm242.4$ & $18.6\pm7.1$ & 10/10 & $479.2\pm1.2$ & 64.3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figures/comparison_plot_full_auto_diff_cropped_colorbar_true_model_outlined.pdf}
+  \caption{Reconstruction and receiver-geometry comparison for one
+  representative repetition. The dashed cyan box marks the true
+  $55\,\mathrm{mm}$ square inclusion; red crosses are the four fixed sources and
+  yellow stars are the 30 receivers. The wave-speed scale is shared, and
+  percentages give MSE reduction from the fixed layout. Every reconstruction
+  uses 100 FWI updates. The color bar is cropped at 80\% of the maximum value of the true model to emphasize differences between the design methods.}
+  \label{fig:reconstruction-comparison}
+\end{figure}

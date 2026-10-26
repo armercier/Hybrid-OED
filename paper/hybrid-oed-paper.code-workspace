@@ -1,0 +1,48 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "latex-workshop.latex.outDir": "%DIR%/build",
+    "latex-workshop.latex.tools": [
+      {
+        "name": "latexmk",
+        "command": "/Library/TeX/texbin/latexmk",
+        "args": [
+          "-synctex=1",
+          "-interaction=nonstopmode",
+          "-file-line-error",
+          "-pdf",
+          "-outdir=%OUTDIR%",
+          "%DOC%"
+        ]
+      }
+    ],
+    "latex-workshop.latex.recipes": [
+      {
+        "name": "latexmk (paper/build)",
+        "tools": [
+          "latexmk"
+        ]
+      }
+    ],
+    "latex-workshop.latex.recipe.default": "first",
+    "latex-workshop.view.pdf.viewer": "tab",
+    "files.exclude": {
+      "build/*.aux": true,
+      "build/*.bbl": true,
+      "build/*.blg": true,
+      "build/*.fdb_latexmk": true,
+      "build/*.fls": true,
+      "build/*.log": true,
+      "build/*.out": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "james-yu.latex-workshop"
+    ]
+  }
+}

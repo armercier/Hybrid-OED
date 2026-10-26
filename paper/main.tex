@@ -1,0 +1,385 @@
+\documentclass{article}
+
+\PassOptionsToPackage{numbers,sort&compress}{natbib}
+\usepackage[dblblindworkshop]{neurips_2026}
+\workshoptitle{Sim2Science}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{yhmath}
+
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\newcommand{\Ldata}{\mathcal{L}_{\mathrm{data}}}
+\newcommand{\Ldesign}{\mathcal{L}_{\mathrm{design}}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\method}{DiffOED}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\title{Differentiable Physics for Sensor Placement in Full-Waveform Inversion}
+
+% The dblblindworkshop option suppresses this block in the review PDF.
+\author{
+  Arnaud Mercier\textsuperscript{1} \quad
+  Ben Moseley\textsuperscript{2} \quad
+  Henrik Rasmus Thomsen\textsuperscript{1} \\
+  \textsuperscript{1}Institute of Geophysics, ETH Zurich, Zurich, Switzerland \\
+  \textsuperscript{2}Department of Earth Science and Engineering, Imperial College London, London, UK \\
+  \texttt{\{arnaud.mercier,henrik.thomsen\}@eaps.ethz.ch} \\
+  \texttt{b.moseley@imperial.ac.uk}
+}
+
+\begin{document}
+
+\maketitle
+
+% \begin{abstract}
+% Optimal experimental design (OED) for full-waveform inversion (FWI) often selects sources or receivers from a predefined candidate survey using a criterion derived from a local linearization. This restricts the design to a preset grid and may misalign the design criterion with the finite nonlinear inversion that it is intended to improve. We instead optimize receiver coordinates continuously by differentiating through a finite sequence of time domain FWI updates. The resulting online design loop alternates between short blocks of FWI, receiver-position updates, and reacquisition. We compare three design objectives. Oracle model error and waveform misfit differentiate through the unrolled FWI trajectory, whereas stochastic Gauss--Newton illumination differentiates only through wave solver sensitivities. We evaluate the methods on a two dimensional acoustic synthetic example inspired by guided-wave non-destructive testing. Across ten paired multi-seed repetitions, all three optimized layouts reduce model error relative to the fixed layout baseline. Mean reductions range from 9.4 to 18.6\% under the same budget of 100 FWI updates. These results provide preliminary evidence that differentiable OED can adapt receiver locations to a finite inversion procedure without requiring a predefined candidate grid.
+% \end{abstract}
+
+% \begin{abstract}
+
+% Full-waveform inversion (FWI) uses wave simulators to infer material properties
+% from measured waveforms, but its reconstruction quality and convergence depends strongly on
+% where sensors are placed. Conventional optimal experimental design often
+% selects sensors positions from a predefined candidate survey using a criterion derived
+% from a local linearization. This restricts the design to a preset grid and may misalign the design criterion with the finite nonlinear inversion that it is intended to improve. To tackle this issue, we introduce a bilevel active acquisition framework that
+% optimizes continuous receiver coordinates using differentiable framework.
+% Each outer iteration assimilates observations from a real world measurement device through a finite block of FWI
+% updates, updates the receiver positions, and reacquires data at the new
+% geometry.
+
+% We investigate two objectives that do not require knowledge of the
+% true material model: a waveform-misfit objective differentiated through the
+% unrolled FWI trajectory and a stochastic Gauss--Newton illumination objective
+% differentiated only through wave-solver sensitivities. We evaluate the framework
+% on a two-dimensional acoustic synthetic example inspired by guided-wave
+% non-destructive testing. Across ten paired repetitions and an equal budget of
+% 100 FWI updates, waveform-misfit and illumination-based placement reduce mean
+% model error by 9.4\% and 16.7\%, respectively, relative to a fixed receiver
+% layout. Although this proof of concept uses synthetic observations and does not
+% yet test simulator misspecification, its acquisition loop is designed to replace
+% synthetic reacquisition with physical measurements. The framework therefore
+% provides a path for using an imperfect differentiable simulator to guide where
+% new real-world data should be collected.
+
+% \end{abstract}
+
+\begin{abstract}
+
+
+% In full-waveform inversion (FWI), the sensor positions that best
+% constrain the material model are generally unknown in advance, yet poor sensor
+% placement can substantially degrade reconstruction quality. In physical settings, this challenge is compounded by discrepancies between the wave simulator used for inversion and the observed system. Rather than fixing sensor positions in advance using the simulator alone, we present an differentiable active acquisition loop that alternates between short blocks of FWI, sensor-position updates, and reacquisition. The loop couples differentiable wave simulation with adaptive data acquisition, allowing the sensor geometry to evolve with the reconstruction instead of being selected once from a predefined candidate set. 
+
+
+In full-waveform inversion (FWI), reconstruction quality depends strongly on sensor placement, yet informative sensor positions are generally unknown in advance. This challenge is particularly acute in physical settings, where the wave simulator used for inversion may differ from the observed system. We present a differentiable active-acquisition loop that alternates short blocks of FWI with continuous receiver-coordinate updates and reacquisition, allowing the geometry to adapt to the evolving reconstruction without requiring a predefined candidate set. We investigate two acquisition design objectives that do not require the true
+material model: waveform misfit differentiated through the unrolled FWI
+trajectory and stochastic Gauss--Newton illumination differentiated only through
+wave-solver sensitivities. In a two-dimensional synthetic acoustic example
+inspired by guided-wave non-destructive testing, both objectives improve
+reconstruction relative to a fixed receiver layout across ten paired
+repetitions. Under the same budget of 100 FWI updates, the waveform misfit and
+stochastic illumination objectives reduce mean model error by 9.4\% and 16.7\%,
+compared to the fixed layout. These synthetic results motivate future closed-loop experiments in which physical measurements replace simulated reacquisition.
+
+\end{abstract}
+
+
+\input{sections/01_introduction}
+\input{sections/02_method}
+\input{sections/03_experiments}
+\input{sections/04_results}
+\input{sections/05_discussion}
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+% Sim2Science requires the checklist after the references and before the
+% appendix. It does not count toward the five-page limit.
+\newpage
+\input{checklist.tex}
+
+\clearpage
+\appendix
+\makeatletter
+\setlength{\@fptop}{0pt}
+\makeatother
+\section{Stochastic illumination criterion}
+\label{app:illumination-derivation}
+
+This section derives the stochastic estimator used by the illumination
+objective. For source $s$, let
+\begin{equation}
+  J_s^t
+  = \left.
+    \frac{\partial \mathcal{F}_{\vect{p}}^{(s)}(\vect{m})}
+         {\partial \vect{m}}
+    \right|_{\vect{p}=\vect{p}^t,\,\vect{m}=\vect{m}_0^t}
+\end{equation}
+be the forward-model Jacobian at outer design iteration $t$. Its local
+Gauss--Newton matrix is $(J_s^t)^\top J_s^t$, whose diagonal measures the
+squared data sensitivity of each model parameter.
+
+Let $\vect{z}_{s,j}\in\{-1,+1\}^{D_s}$ be an independent Rademacher vector,
+where $D_s$ is the number of data samples for source $s$. Since
+$\mathbb{E}[\vect{z}_{s,j}\vect{z}_{s,j}^\top]=I$, we have
+\begin{align}
+  \mathbb{E}\!\left[
+    ((J_s^t)^\top\vect{z}_{s,j})
+    \odot
+    ((J_s^t)^\top\vect{z}_{s,j})
+  \right]
+  &= \operatorname{diag}\!\left(
+       (J_s^t)^\top
+       \mathbb{E}[\vect{z}_{s,j}\vect{z}_{s,j}^\top]
+       J_s^t
+     \right) \\
+  &= \operatorname{diag}\!\left((J_s^t)^\top J_s^t\right),
+  \label{eq:illumination-expectation}
+\end{align}
+where $\odot$ denotes elementwise multiplication. This identity gives an
+unbiased randomized diagonal estimator~\citep{bekas2007diagonal}.
+
+In the implementation, each probe is normalized as
+$\vect{q}_{s,j}=\vect{z}_{s,j}/\sqrt{D_s}$. With $S$ sources and $Q$ probes per
+source, the unsmoothed illumination estimate is
+\begin{equation}
+  \widehat{\vect{h}}
+  = \frac{1}{SQ}\sum_{s=1}^{S}\sum_{j=1}^{Q}
+    ((J_s^t)^\top\vect{q}_{s,j})
+    \odot
+    ((J_s^t)^\top\vect{q}_{s,j}).
+  \label{eq:illumination}
+\end{equation}
+Thus, $\mathbb{E}[\widehat{\vect{h}}]$ is the source-averaged Gauss--Newton
+diagonal scaled by $1/D_s$ (the data size is identical for all sources here).
+Each product $(J_s^t)^\top\vect{q}_{s,j}$ is computed as a
+vector--Jacobian product by automatic differentiation, avoiding explicit
+construction of $J_s^t$.
+
+After one spatial smoothing application, denote the resulting field by
+$\vect{h}$ and its spatial mean by $\bar h$. The receiver coordinates minimize
+\begin{equation}
+  \mathcal{L}_{\mathrm{illum}}(\vect{p}^t;\vect{m}_0^t)
+  = \operatorname{Var}\!\left(\frac{\vect{h}}{\bar h+\epsilon}\right)
+    - \beta\log(\bar h+\epsilon),
+  \qquad \beta=0.05,\quad \epsilon=10^{-12}.
+  \label{eq:illumination-scalarization}
+\end{equation}
+The first term penalizes relative spatial variation and therefore favors even
+coverage; the second decreases as the mean illumination grows and therefore
+prevents a uniformly weak geometry from being preferred. The probes are fixed
+across design iterations within a repetition, making the optimized stochastic
+objective deterministic within that run.
+
+\section{Experimental parameters}
+
+The main text summarizes the experimental logic. Tables~\ref{tab:acoustic-parameters}--
+\ref{tab:outer-design-parameters} collect the numerical values used for the
+reported experiments.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.68\linewidth]{figures/sh0_model_sources_receivers_outlined.pdf}
+  \caption{True wave-speed model and nominal initial acquisition geometry.
+  The white square is the $55\,\mathrm{mm}$ inclusion, red crosses are the four
+  fixed sources, and yellow stars are the 30 initial receiver positions.}
+  \label{fig:true-model-geometry}
+\end{figure}
+
+\begin{table}[!htbp]
+  \centering
+  \small
+  \caption{Acoustic model and wave-simulation parameters.}
+  \label{tab:acoustic-parameters}
+  \begin{tabular}{@{}L{0.34\linewidth}L{0.59\linewidth}@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Governing model & Two-dimensional scalar acoustic equation; first-order staggered-grid time stepping \\
+    Domain and grid & $1.1\,\mathrm{m}\times1.1\,\mathrm{m}$; $210\times210$ points; $\Delta x=\Delta y=5.26\,\mathrm{mm}$ \\
+    Background material & Wave speed $2100\,\mathrm{m\,s^{-1}}$; density $1180\,\mathrm{kg\,m^{-3}}$ \\
+    True inclusion & $55\,\mathrm{mm}$ square centered at $(-50,50)\,\mathrm{mm}$; wave speed $3200\,\mathrm{m\,s^{-1}}$; density $3000\,\mathrm{kg\,m^{-3}}$ \\
+    Inverted parameters & Wave speed only; homogeneous initial speed and homogeneous background density \\
+    Source wavelet & Ricker pulse; central frequency $25\,\mathrm{kHz}$; maximum modeled frequency $50\,\mathrm{kHz}$ \\
+    Spatial resolution & Eight grid points per minimum wavelength at $50\,\mathrm{kHz}$ in the background \\
+    Time sampling & 807 steps; $\Delta t=0.930\,\mu\mathrm{s}$; record length $750.8\,\mu\mathrm{s}$ \\
+    Absorbing boundary & 19-cell ($0.1\,\mathrm{m}$) convolutional PML; target reflection $10^{-6}$; polynomial order 3; maximum stretching coefficient 3 \\
+    Source/receiver sampling & Bilinear injection and sampling \\
+    Trace preprocessing & Each receiver trace divided by its maximum absolute amplitude, with floor $10^{-12}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \small
+  \caption{Acquisition-geometry parameters.}
+  \label{tab:acquisition-parameters}
+  \begin{tabular}{@{}L{0.34\linewidth}L{0.59\linewidth}@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Sources & Four fixed sources at $(\pm0.35,0)\,\mathrm{m}$ and $(0,\pm0.35)\,\mathrm{m}$ \\
+    Receivers & 30 receivers with two continuously optimized coordinates each \\
+    Initial receiver geometry & Equally spaced on the diagonal from $(-0.15,-0.15)\,\mathrm{m}$ to $(0.15,0.15)\,\mathrm{m}$, with repetition-specific jitter in the multi-seed study \\
+    Admissible receiver region & Non-absorbing region $[-0.45,0.45]^2\,\mathrm{m}$; projection during objective evaluation and after outer design iterations \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \small
+  \caption{Inner FWI parameters.}
+  \label{tab:fwi-parameters}
+  \begin{tabular}{@{}L{0.34\linewidth}L{0.59\linewidth}@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Data loss & Mean squared error between trace-normalized observed and predicted waveforms \\
+    Model optimizer & Stochastic gradient descent; notebook learning-rate parameter 25, multiplied by $10^{6}$ before optimizer construction \\
+    Stochastic source sampling & One of four sources drawn uniformly per FWI update; repetition-specific schedule shared across methods \\
+    Model-gradient processing & One spatial smoothing application per FWI update, followed by multiplication by 10 \\
+    Optimized-method budget & $T=5$ outer design iterations; $K=20$ FWI updates per iteration; $TK=100$ total FWI updates \\
+    Fixed-geometry budget & One uninterrupted 100-update FWI inversion \\
+    Model carry & $\vect{m}^{t+1}_0=\vect{m}^{t}_K$ between outer design iterations \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+  \centering
+  \small
+  \caption{Outer design loop and illumination parameters.}
+  \label{tab:outer-design-parameters}
+  \begin{tabular}{@{}L{0.34\linewidth}L{0.59\linewidth}@{}}
+    \toprule
+    Parameter & Value \\
+    \midrule
+    Outer design gradient & Reverse-mode automatic differentiation; reconstruction-aware objectives differentiate through the 20 unrolled SGD updates and receiver sampling \\
+    Receiver optimizer & Optax Adam; learning rate 4; default $(\beta_1,\beta_2)=(0.9,0.999)$ \\
+    Coordinate constraints & Project candidate and updated coordinates to the admissible region \\
+    Illumination gradient & Automatic differentiation through the wave-solver VJPs and illumination scalarization; no unrolled FWI derivative \\
+    Illumination probes & 12 Rademacher probes per source, each divided by the square root of its number of entries; repetition-specific probes fixed within each run \\
+    Illumination processing & Average over probes and sources; one spatial smoothing application; normalize by mean illumination \\
+    Illumination scalarization & Uniformity variance plus $0.05$ times negative log mean strength; numerical offset $10^{-12}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\clearpage
+\section{Multi-seed and computational results}
+
+Each repetition uses independent random seeds controlling three sources of
+variation:
+\begin{itemize}
+  \item \textbf{Layout:} the perturbation of the initial receiver coordinates;
+  \item \textbf{FWI sources:} the stochastic sequence of sources selected by
+  the inner FWI updates; and
+  \item \textbf{Illumination probes:} the stochastic probes used by the
+  illumination objective.
+\end{itemize}
+Within each paired repetition, all methods share the same initial receiver
+layout and FWI source sequence, while the illumination-probe seed applies only
+to the illumination method.
+
+\paragraph{Computational measurements.}
+The runs were executed under Linux on an x86-64 workstation equipped with one
+AMD Ryzen Threadripper 3970X processor (32 physical cores, 64 hardware threads,
+and a reported frequency range of $2.2$--$3.7\,\mathrm{GHz}$). Total runtime is
+the wall-clock time for a complete method run, including 100 FWI updates and,
+for the optimized methods, five design updates. For the oracle and waveform
+misfit objectives, the nested FWI and receiver-hypergradient calculations are
+compiled and timed together and cannot be separated; illumination records its
+design and subsequent FWI timings separately. The saved measurements do not
+separate JAX compilation or warm-up from execution, so the reported runtimes
+are end-to-end measurements under the compilation and cache state of each run.
+The peak (memory) RSS increase is the maximum recorded process resident set size minus
+the process RSS at the start of the run.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.90\linewidth]{figures/paired_improvement_outlined.pdf}
+  \caption{Improvement in final model MSE relative to the paired fixed-layout
+  baseline. Points are individual completed repetitions, diamonds show the
+  mean, and bars show one sample standard deviation. The dashed line denotes no
+  improvement. Each method is evaluated over ten paired repetitions.}
+  \label{fig:paired-improvement}
+\end{figure}
+
+% \begin{figure}[!htbp]
+%   \centering
+%   \includegraphics[width=0.92\linewidth]{figures/paired_model_mse.pdf}
+%   \caption{Final model MSE for the fixed layout and optimized objectives. Gray
+%   lines connect results belonging to the same repetition; lower values are
+%   better.}
+%   \label{fig:paired-model-mse}
+% \end{figure}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=0.84\linewidth]{figures/runtime_vs_improvement_outlined.pdf}
+  \caption{Total runtime and paired reconstruction improvement for every
+  optimized run. The illumination objective is faster but more variable than
+  the objectives differentiated through the unrolled FWI trajectory.}
+  \label{fig:runtime-improvement}
+\end{figure}
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/compute_time_and_memory_per_run_outlined.pdf}
+  \caption{Total runtime and additional peak host memory by method. Points are
+  individual runs, diamonds show the mean, and bars show one sample standard
+  deviation. Differentiating through the unrolled inversion substantially
+  increases memory relative to the illumination differentiation path.}
+  \label{fig:compute-memory}
+\end{figure}
+
+\clearpage
+\section{Oracle model error reconstruction}
+
+Figure~\ref{fig:reconstruction-comparison-oracle} shows the same reconstruction comparison as Fig.~\ref{fig:reconstruction-comparison} but for the oracle model error objective.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figures/comparison_plot_full_auto_diff_cropped_colorbar_outlined.pdf}
+  \caption{Reconstruction and receiver-geometry comparison for one
+  representative repetition. The dashed cyan box marks the true
+  $55\,\mathrm{mm}$ square inclusion; red crosses are the four fixed sources and
+  yellow stars are the 30 receivers. The wave-speed scale is shared, and
+  percentages give MSE reduction from the fixed layout. Every reconstruction
+  uses 100 FWI updates. The color bar is cropped at 80\% of the maximum value of the true model to emphasize differences between the design methods.}
+  \label{fig:reconstruction-comparison-oracle}
+\end{figure}
+
+\clearpage
+\section{Receiver trajectories}
+
+Figure~\ref{fig:receiver-trajectories} shows how the receiver geometries evolve
+over five outer design iterations for each optimized objective.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.96\linewidth]{figures/comparison_plot_full_auto_diff_trajectories_outlined.pdf}
+  \caption{Receiver motion during acquisition optimization. Panel (a) shows
+  the fixed initial layout. Panels (b)--(d) show the layouts optimized with the
+  illumination, waveform misfit, and oracle model error
+  objectives, respectively. Orange polylines connect each receiver's successive
+  positions over the five outer design iterations; yellow stars mark the final receiver
+  positions. Red crosses are the fixed sources, and the dashed cyan square marks
+  the true inclusion.}
+  \label{fig:receiver-trajectories}
+\end{figure}
+
+\end{document}

@@ -1,0 +1,41 @@
+\section{Experimental setup}
+
+\paragraph{Model and wave simulation.}
+Following the acoustic proof of concept described above, the observations are generated and FWI is performed with the same differentiable two-dimensional 
+acoustic solver. We use a $25\,\mathrm{kHz}$ source in a homogeneous background
+containing one faster square inclusion. The synthetic inclusion also has a
+density contrast, whereas FWI reconstructs wave speed only from a homogeneous
+initial model and holds density fixed. This choice reduces the computational cost of FWI. Wave propagation uses a first-order
+staggered-grid scheme with bilinear source injection and receiver sampling.
+Appendix Table~\ref{tab:acoustic-parameters} gives the complete discretization,
+material, boundary, and preprocessing parameters.
+
+\paragraph{Acquisition geometry.}
+Four sources remain fixed around the target, while the coordinates of 30 receivers are continuously optimized. The receivers begin on a diagonal line crossing the
+model and are projected to the non-absorbing region after every outer
+design iteration. Appendix Fig.~\ref{fig:true-model-geometry} shows the true
+model and nominal initial geometry; exact coordinates and bounds are listed in
+Appendix Table~\ref{tab:acquisition-parameters}.
+
+\paragraph{Inversion and design optimization.}
+% As defined in Eq.~\eqref{eq:fwi_loss}, FWI minimizes the mean squared difference between trace-normalized observed and predicted waveforms. 
+
+For all comparisons, we use $T=5$ outer design iterations with $K=20$ FWI updates per design iteration. Each
+optimized reconstruction therefore uses $TK=100$ FWI updates, while the
+fixed-layout baseline receives one uninterrupted 100-update inversion. The
+methods thus have the same FWI reconstruction budget, although their design costs
+differ.
+
+The FWI algorithm uses stochastic gradient descent (SGD). Compared with Adam,
+SGD has lower memory requirements, making it practical to retain the computation
+graph for the 20 FWI updates required by the oracle and waveform misfit objectives. Appendix Tables~\ref{tab:fwi-parameters}
+and~\ref{tab:outer-design-parameters} report the remaining optimizer,
+illumination, and randomization settings.
+
+% We compare the fixed initial layout with layouts optimized using the oracle
+% model-error, waveform misfit, and illumination objectives. 
+
+% The primary metric is the mean squared model error over the complete grid. The
+% multi-seed protocol holds the target fixed while varying the paired receiver
+% initialization and source schedule; wall-clock time and peak memory are recorded
+% for each run.
