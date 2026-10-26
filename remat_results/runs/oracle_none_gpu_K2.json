@@ -1,0 +1,14 @@
+{
+  "tag": "oracle_none_gpu_K2",
+  "remat": "none",
+  "method": "oracle",
+  "device": "gpu",
+  "updates": 2,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "cuda:0",
+  "compile_s": 6.153347693383694,
+  "xla_temp_gib": 10.37501172721386,
+  "xla_total_gib": 10.375340793281794,
+  "error": "XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 11140084016 bytes."
+}

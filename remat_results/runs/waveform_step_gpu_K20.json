@@ -1,0 +1,21 @@
+{
+  "tag": "waveform_step_gpu_K20",
+  "remat": "step",
+  "method": "waveform",
+  "device": "gpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "cuda:0",
+  "compile_s": 6.812937064096332,
+  "xla_temp_gib": 5.852156475186348,
+  "xla_total_gib": 5.852485675364733,
+  "loss": 0.002379578072577715,
+  "run_s": [
+    7.481453370302916,
+    7.380648195743561
+  ],
+  "grad_norm": 0.0007660706760361791,
+  "peak_rss_increase_gib": 0.36695098876953125,
+  "gpu_peak_gib": 5.853310823440552
+}

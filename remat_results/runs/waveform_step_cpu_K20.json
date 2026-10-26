@@ -1,0 +1,20 @@
+{
+  "tag": "waveform_step_cpu_K20",
+  "remat": "step",
+  "method": "waveform",
+  "device": "cpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 7.737004587426782,
+  "xla_temp_gib": 4.8047084659338,
+  "xla_total_gib": 4.8050376661121845,
+  "loss": 0.0023795757442712784,
+  "run_s": [
+    119.9819057714194,
+    119.97038389742374
+  ],
+  "grad_norm": 0.0007660685805603862,
+  "peak_rss_increase_gib": 4.805839538574219
+}

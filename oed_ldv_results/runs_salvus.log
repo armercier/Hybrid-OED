@@ -1,0 +1,12 @@
+round 0: loss 0.0629 | cube loc. error 3.5 mm, contrast -0.60, peak mass x1.51 | illum 2.583, max move 14.1 mm | t=314s
+round 1: loss 0.0373 | cube loc. error 3.5 mm, contrast -1.06, peak mass x1.71 | illum 4.249, max move 13.3 mm | t=620s
+round 2: loss 0.0311 | cube loc. error 3.5 mm, contrast -0.34, peak mass x1.81 | illum 3.674, max move 12.1 mm | t=927s
+round 3: loss 0.0321 | cube loc. error 3.4 mm, contrast 0.18, peak mass x1.84 | illum 2.867, max move 10.7 mm | t=1233s
+round 4: loss 0.0278 | cube loc. error 3.4 mm, contrast 0.63, peak mass x2.08 | illum 2.993, max move 11.2 mm | t=1540s
+dense-field prediction error: 0.329 (plain plate with the same filter: 0.323); total 1580s
+round 0: loss 0.0574 | cube loc. error 54.2 mm, contrast -0.33, peak mass x1.50 | t=131s
+round 1: loss 0.0373 | cube loc. error 54.2 mm, contrast -0.85, peak mass x1.53 | t=254s
+round 2: loss 0.0280 | cube loc. error 5.8 mm, contrast -1.27, peak mass x1.52 | t=377s
+round 3: loss 0.0240 | cube loc. error 12.6 mm, contrast -1.44, peak mass x1.53 | t=501s
+round 4: loss 0.0223 | cube loc. error 12.6 mm, contrast -1.62, peak mass x1.60 | t=624s
+dense-field prediction error: 0.324 (plain plate with the same filter: 0.323); total 664s

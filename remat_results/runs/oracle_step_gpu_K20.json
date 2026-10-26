@@ -1,0 +1,21 @@
+{
+  "tag": "oracle_step_gpu_K20",
+  "remat": "step",
+  "method": "oracle",
+  "device": "gpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "cuda:0",
+  "compile_s": 5.384671855717897,
+  "xla_temp_gib": 3.068903401494026,
+  "xla_total_gib": 3.069232601672411,
+  "loss": 3442.63818359375,
+  "run_s": [
+    7.185504160821438,
+    7.105583291500807
+  ],
+  "grad_norm": 49.109127044677734,
+  "peak_rss_increase_gib": 0.24379348754882812,
+  "gpu_peak_gib": 3.0700576305389404
+}

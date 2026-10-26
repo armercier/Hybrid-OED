@@ -1,0 +1,20 @@
+{
+  "tag": "oracle_none_cpu_K2",
+  "remat": "none",
+  "method": "oracle",
+  "device": "cpu",
+  "updates": 2,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 6.117214949801564,
+  "xla_temp_gib": 9.18061163276434,
+  "xla_total_gib": 9.180940698832273,
+  "loss": 3411.950927734375,
+  "run_s": [
+    10.230327133089304,
+    10.504330551251769
+  ],
+  "grad_norm": 26.556148529052734,
+  "peak_rss_increase_gib": 9.179943084716797
+}

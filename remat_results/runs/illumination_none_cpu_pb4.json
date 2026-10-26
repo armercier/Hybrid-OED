@@ -1,0 +1,21 @@
+{
+  "tag": "illumination_none_cpu_pb4",
+  "remat": "none",
+  "method": "illumination",
+  "device": "cpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "probe_batch": 4,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 2.360239567235112,
+  "xla_temp_gib": 9.737284176051617,
+  "xla_total_gib": 9.73761322721839,
+  "loss": 13.28297233581543,
+  "run_s": [
+    35.936299201101065,
+    36.42432893998921
+  ],
+  "grad_norm": 3.433469533920288,
+  "peak_rss_increase_gib": 9.735240936279297
+}

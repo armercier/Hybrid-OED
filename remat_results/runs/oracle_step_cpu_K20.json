@@ -1,0 +1,20 @@
+{
+  "tag": "oracle_step_cpu_K20",
+  "remat": "step",
+  "method": "oracle",
+  "device": "cpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 5.965746840462089,
+  "xla_temp_gib": 4.263862431049347,
+  "xla_total_gib": 4.264191631227732,
+  "loss": 3442.638916015625,
+  "run_s": [
+    117.10751797258854,
+    115.58234929665923
+  ],
+  "grad_norm": 49.109107971191406,
+  "peak_rss_increase_gib": 4.264682769775391
+}

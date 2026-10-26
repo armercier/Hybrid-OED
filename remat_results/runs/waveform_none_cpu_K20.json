@@ -1,0 +1,20 @@
+{
+  "tag": "waveform_none_cpu_K20",
+  "remat": "none",
+  "method": "waveform",
+  "device": "cpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 8.1680190525949,
+  "xla_temp_gib": 65.9749793484807,
+  "xla_total_gib": 65.97530854865909,
+  "loss": 0.002379579236730933,
+  "run_s": [
+    96.51726688630879,
+    98.52845548093319
+  ],
+  "grad_norm": 0.000766072713304311,
+  "peak_rss_increase_gib": 65.97591781616211
+}

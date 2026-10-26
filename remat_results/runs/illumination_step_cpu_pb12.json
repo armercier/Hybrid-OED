@@ -1,0 +1,21 @@
+{
+  "tag": "illumination_step_cpu_pb12",
+  "remat": "step",
+  "method": "illumination",
+  "device": "cpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "probe_batch": 12,
+  "platform": "TFRT_CPU_0",
+  "compile_s": 4.084021100774407,
+  "xla_temp_gib": 2.4005501195788383,
+  "xla_total_gib": 2.400879170745611,
+  "loss": 13.282975196838379,
+  "run_s": [
+    100.32760616578162,
+    100.89735713228583
+  ],
+  "grad_norm": 3.4334769248962402,
+  "peak_rss_increase_gib": 2.401569366455078
+}

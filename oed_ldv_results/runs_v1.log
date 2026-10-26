@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/merciera/salvus_data/venv-salvus-2025.1.2/bin/python', '/home/merciera/git/Hybrid-OED/src/oed_ldv/acquire_salvus_ldv.py', '--receivers', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_illum/salvus_illum_r0_receivers.npy', '--name', 'salvus_illum_r0', '--config', 'cube_x-20mm_Q40', '--out', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_illum/salvus_illum_r0_data.npz']' returned non-zero exit status 1.
+Traceback (most recent call last):
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/merciera/salvus_data/venv-salvus-2025.1.2/bin/python', '/home/merciera/git/Hybrid-OED/src/oed_ldv/acquire_salvus_ldv.py', '--receivers', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_fixed/salvus_fixed_r0_receivers.npy', '--name', 'salvus_fixed_r0', '--config', 'cube_x-20mm_Q40', '--out', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_fixed/salvus_fixed_r0_data.npz']' returned non-zero exit status 1.
+round 0: loss 0.0432 | cube loc. error 3.5 mm, contrast -0.25, peak mass x1.52 | illum 2.583, max move 14.1 mm | t=151s
+round 1: loss 0.0258 | cube loc. error 3.5 mm, contrast -0.67, peak mass x1.84 | illum 4.129, max move 14.0 mm | t=293s
+round 2: loss 0.0192 | cube loc. error 3.5 mm, contrast -0.17, peak mass x2.06 | illum 3.889, max move 12.5 mm | t=436s
+round 3: loss 0.0185 | cube loc. error 3.5 mm, contrast 0.42, peak mass x2.37 | illum 2.917, max move 12.1 mm | t=578s
+round 4: loss 0.0157 | cube loc. error 3.4 mm, contrast 0.84, peak mass x2.62 | illum 2.760, max move 10.5 mm | t=720s
+dense-field prediction error: 0.340 (plain plate with the same filter: 0.299); total 782s
+round 0: loss 0.0455 | cube loc. error 26.6 mm, contrast -0.24, peak mass x1.52 | t=134s
+round 1: loss 0.0261 | cube loc. error 24.6 mm, contrast -0.75, peak mass x1.53 | t=258s
+round 2: loss 0.0164 | cube loc. error 5.8 mm, contrast -1.02, peak mass x1.59 | t=381s
+round 3: loss 0.0128 | cube loc. error 5.8 mm, contrast -1.13, peak mass x1.63 | t=505s
+round 4: loss 0.0111 | cube loc. error 12.6 mm, contrast -1.19, peak mass x1.67 | t=629s
+dense-field prediction error: 0.301 (plain plate with the same filter: 0.305); total 691s

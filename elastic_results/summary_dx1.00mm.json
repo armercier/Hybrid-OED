@@ -1,0 +1,107 @@
+{
+  "dx": 0.001,
+  "dt": 1.5540808377726316e-07,
+  "wavelet": {
+    "f0": 25000.0,
+    "shift": 0.0
+  },
+  "background": {
+    "vp": 2730.0,
+    "vs": 1340.0,
+    "rho": 1180.0
+  },
+  "results": [
+    {
+      "event": "event_0001",
+      "component": "y",
+      "source_m": [
+        -0.35000000000000003,
+        0.0
+      ],
+      "plane_stress_inclusion": {
+        "all": {
+          "misfit": 0.7700477686705238,
+          "median_corr": 0.7949500448715416,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.967741027637871,
+          "median_corr": 0.6569998426129613,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.4039644231066849,
+          "median_corr": 0.9197458040605238,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 7.389735925942659
+      },
+      "plane_stress_homogeneous": {
+        "all": {
+          "misfit": 0.601572094324407,
+          "median_corr": 0.8190246604817246,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.6896304278984056,
+          "median_corr": 0.7219845254987987,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.39356882623674755,
+          "median_corr": 0.9248314630857564,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 6.2860109731554985
+      }
+    },
+    {
+      "event": "event_0004",
+      "component": "x",
+      "source_m": [
+        0.0,
+        -0.35000000000000003
+      ],
+      "plane_stress_inclusion": {
+        "all": {
+          "misfit": 0.7097306022453128,
+          "median_corr": 0.8131263247744793,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.872228404322765,
+          "median_corr": 0.6945869731053483,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.39923596332591643,
+          "median_corr": 0.9226813201549354,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 6.291823310777545
+      },
+      "plane_stress_homogeneous": {
+        "all": {
+          "misfit": 0.5999951125484729,
+          "median_corr": 0.8169416618901253,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.6871307654277499,
+          "median_corr": 0.722976439584843,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.3915246865627117,
+          "median_corr": 0.9252098601615362,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 6.28768558613956
+      }
+    }
+  ]
+}

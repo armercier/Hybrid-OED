@@ -1,0 +1,110 @@
+{
+ "homogeneous_behind": 0.5450304887751541,
+ "homogeneous_before": 0.37441956337523424,
+ "best": {
+  "cx": -0.022,
+  "cy": -0.005,
+  "radius": 0.012,
+  "kind": "thicker h x2",
+  "behind": 0.5298408394097114,
+  "before": 0.3714063966092643
+ },
+ "grid": [
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "hole (h x0.05, vs x0.3)",
+   "behind": 0.5420216262436238,
+   "before": 0.3804442563604134
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "thinner h x0.5",
+   "behind": 0.5666308884755442,
+   "before": 0.37685095415484215
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "thicker h x2",
+   "behind": 0.5302507284926083,
+   "before": 0.40222952470939805
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "added mass rho x4",
+   "behind": 0.5838633794758927,
+   "before": 0.37559009129343285
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "stiffer vs x2",
+   "behind": NaN,
+   "before": NaN
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.006,
+   "kind": "softer vs x0.5",
+   "behind": 0.614754509568802,
+   "before": 0.36699311931089074
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "hole (h x0.05, vs x0.3)",
+   "behind": 0.7695470420153373,
+   "before": 0.47787725327044556
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "thinner h x0.5",
+   "behind": 0.6663691077755665,
+   "before": 0.40154981613242446
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "thicker h x2",
+   "behind": 0.5298408394097114,
+   "before": 0.3714063966092643
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "added mass rho x4",
+   "behind": 0.6049870545183806,
+   "before": 0.388511534758479
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "stiffer vs x2",
+   "behind": NaN,
+   "before": NaN
+  },
+  {
+   "cx": -0.022,
+   "cy": -0.005,
+   "radius": 0.012,
+   "kind": "softer vs x0.5",
+   "behind": 0.8245011587179651,
+   "before": 0.39642395805141045
+  }
+ ]
+}

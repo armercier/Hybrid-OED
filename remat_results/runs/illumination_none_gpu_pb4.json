@@ -1,0 +1,15 @@
+{
+  "tag": "illumination_none_gpu_pb4",
+  "remat": "none",
+  "method": "illumination",
+  "device": "gpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": false,
+  "probe_batch": 4,
+  "platform": "cuda:0",
+  "compile_s": 3.0097339507192373,
+  "xla_temp_gib": 9.733879245817661,
+  "xla_total_gib": 9.734208296984434,
+  "error": "XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673256 bytes."
+}

@@ -1,0 +1,9 @@
+{
+  "device": "cuda:0",
+  "methods": [
+    "baseline"
+  ],
+  "peak_device_gib": 1.2008471488952637,
+  "process_wall_s": 99.44550684839487,
+  "status": 0
+}

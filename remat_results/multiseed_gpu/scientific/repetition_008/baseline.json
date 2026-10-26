@@ -1,0 +1,167 @@
+{
+  "arrays_file": "baseline.npz",
+  "candidate_fwi_update_evaluations": 100,
+  "config": {
+    "Lx": 1.1,
+    "Ly": 1.1,
+    "active_receiver_count": 30,
+    "active_source_ids": [
+      1,
+      4,
+      7,
+      10
+    ],
+    "baseline_fwi_updates": 100,
+    "c_max": 3200.0,
+    "c_min": 2100.0,
+    "cfl_safety": 0.8,
+    "density": 1180.0,
+    "design_learning_rate": 4.0,
+    "design_updates": 5,
+    "f0": 25000.0,
+    "f0_max": 25000.0,
+    "fmax_factor": 2.0,
+    "fwi_adam_beta1": 0.9,
+    "fwi_adam_beta2": 0.9,
+    "fwi_learning_rate": 25000000.0,
+    "fwi_updates_per_round": 20,
+    "gradient_smoothing_multiplier": 10.0,
+    "gradient_smoothing_passes": 1,
+    "illumination_alpha_strength": 0.05,
+    "illumination_eps": 1e-12,
+    "illumination_probes": 12,
+    "inclusion_density": 3000.0,
+    "inner_optimizer": "sgd",
+    "pml_kappa_max": 3.0,
+    "pml_polynomial_order": 3,
+    "pml_reflection_coefficient": 1e-06,
+    "pml_thickness_m": 0.1,
+    "points_per_wavelength": 8,
+    "receiver_gradient_method": "full_autodiff",
+    "receiver_grid_count_x": 30,
+    "receiver_grid_count_y": 30,
+    "receiver_max_m": 0.15,
+    "receiver_min_m": -0.15,
+    "scatterer_center_x_m": -0.05,
+    "scatterer_center_y_m": 0.05,
+    "scatterer_side_m": 0.055,
+    "smoke_n_steps": 24,
+    "smoke_test": false,
+    "source_inner_count": 3,
+    "source_inner_max_m": 0.25,
+    "source_inner_min_m": -0.25,
+    "source_side_offset_m": 0.2,
+    "spsa_c_grid": 1.0,
+    "total_time_s": 0.00075
+  },
+  "created_utc": "2026-10-24T18:47:53.440522+00:00",
+  "final_model_mse": 3387.389404296875,
+  "improved": false,
+  "improvement_percent": 0.0,
+  "layout_jitter_grid": 2.0,
+  "memory_metric": "host process RSS sampled from /proc/self/status",
+  "method": "baseline",
+  "method_label": "Fixed receiver layout",
+  "number_design_updates": 0,
+  "paired_baseline_mse": 3387.389404296875,
+  "peak_rss_increase_mb": 5.2421875,
+  "peak_rss_mb": 884.08984375,
+  "protocol": {
+    "baseline_uninterrupted": true,
+    "carry_fwi_optimizer_state_between_rounds": false,
+    "carry_reconstructed_model_between_rounds": false,
+    "design_updates": 0,
+    "differentiate_through_fwi": false,
+    "extra_final_inversion": false,
+    "fwi_updates_per_round": 20,
+    "illumination_differentiates_through_fwi": false,
+    "inner_optimizer": "sgd",
+    "normalization": "each receiver trace divided by its max absolute amplitude",
+    "observations": "JAX true-model synthetic traces at current receiver positions"
+  },
+  "receiver_design": {
+    "gradient_method": "full_autodiff",
+    "learning_rate": 4.0,
+    "optimizer": "adam",
+    "projection_lower_grid": 19,
+    "projection_upper_grid": [
+      190,
+      190
+    ]
+  },
+  "repetition": 8,
+  "repetition_seed": 4133003042,
+  "resumed_invocation": true,
+  "rss_start_mb": 878.84765625,
+  "runtime_design_seconds": 0.0,
+  "runtime_environment": {
+    "jax_devices": [
+      "cuda:0"
+    ],
+    "jax_version": "0.4.35",
+    "platform": "Linux-5.15.0-89-generic-x86_64-with-glibc2.35",
+    "python": "3.12.7 | packaged by Anaconda, Inc. | (main, Oct  4 2024, 13:27:36) [GCC 11.2.0]"
+  },
+  "runtime_fwi_seconds": 9.109924228861928,
+  "runtime_total_seconds": 9.409143211320043,
+  "schema_version": 2,
+  "seeds": {
+    "fwi_sources": 1133258129,
+    "illumination_probes": 1361681278,
+    "layout": 1861537488,
+    "repetition": 4133003042,
+    "spsa": 3406104136
+  },
+  "smoke_test": false,
+  "solver": {
+    "dt_s": 9.304036594559837e-07,
+    "dx_m": 0.005263157894736843,
+    "dy_m": 0.005263157894736843,
+    "n_steps": 807,
+    "nx": 210,
+    "ny": 210,
+    "pml_width_grid": 19,
+    "receiver_count": 30,
+    "scientific_n_steps": 807,
+    "source_count": 4,
+    "source_positions_grid": [
+      [
+        38.0,
+        104.5
+      ],
+      [
+        104.5,
+        38.0
+      ],
+      [
+        171.0,
+        104.5
+      ],
+      [
+        104.5,
+        171.0
+      ]
+    ],
+    "source_positions_m": [
+      [
+        -0.35000000000000003,
+        0.0
+      ],
+      [
+        0.0,
+        -0.35000000000000003
+      ],
+      [
+        0.35000000000000003,
+        0.0
+      ],
+      [
+        0.0,
+        0.35000000000000003
+      ]
+    ]
+  },
+  "status": "completed",
+  "total_fwi_update_count": 100,
+  "workflow": "sgd_full_autodiff"
+}

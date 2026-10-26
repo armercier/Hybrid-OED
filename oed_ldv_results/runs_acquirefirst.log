@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/merciera/salvus_data/venv-salvus-2025.1.2/bin/python', '/home/merciera/git/Hybrid-OED/src/oed_ldv/acquire_salvus_ldv.py', '--receivers', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_illum/salvus_illum_r0_receivers.npy', '--name', 'salvus_illum_r0', '--config', 'cube_x-20mm_Q40', '--out', '/home/merciera/git/Hybrid-OED/oed_ldv_results/salvus_illum/salvus_illum_r0_data.npz']' returned non-zero exit status 1.
+round 0: loss 0.0455 | cube loc. error 26.6 mm, contrast -0.24, peak mass x1.52 | design objective 4.151, max move 14.1 mm | t=134s
+round 1: loss 0.0320 | cube loc. error 3.5 mm, contrast -0.46, peak mass x1.70 | design objective 3.766, max move 14.1 mm | t=279s
+round 2: loss 0.0225 | cube loc. error 5.8 mm, contrast -0.73, peak mass x1.84 | design objective 3.651, max move 13.2 mm | t=421s
+round 3: loss 0.0183 | cube loc. error 3.4 mm, contrast -0.70, peak mass x2.05 | design objective 4.132, max move 10.8 mm | t=563s
+round 4: loss 0.0177 | cube loc. error 8.4 mm, contrast -0.53, peak mass x2.29 | t=705s
+dense-field prediction error: 0.321 (plain plate with the same filter: 0.303); total 768s

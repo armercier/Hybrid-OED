@@ -1,0 +1,401 @@
+$ /home/merciera/git/Hybrid-OED/src/remat/run_multiseed_remat.py --child --num-repetitions 10 --master-seed 20250813 --output-dir remat_results/multiseed_gpu --device auto --methods baseline --resume
+repetition 0/9, seed=732827411
+  running baseline
+  completed baseline: MSE=3335.01, improvement=+0.000%, runtime=12.92s, peak RSS=838.7 MiB
+repetition 1/9, seed=789618308
+  running baseline
+  completed baseline: MSE=3473.1, improvement=+0.000%, runtime=9.45s, peak RSS=846.9 MiB
+repetition 2/9, seed=149505632
+  running baseline
+  completed baseline: MSE=3309.68, improvement=+0.000%, runtime=9.40s, peak RSS=852.7 MiB
+repetition 3/9, seed=441330971
+  running baseline
+  completed baseline: MSE=3353.48, improvement=+0.000%, runtime=9.40s, peak RSS=858.0 MiB
+repetition 4/9, seed=3996846613
+  running baseline
+  completed baseline: MSE=3386.57, improvement=+0.000%, runtime=9.43s, peak RSS=863.0 MiB
+repetition 5/9, seed=723256431
+  running baseline
+  completed baseline: MSE=3287.06, improvement=+0.000%, runtime=9.40s, peak RSS=868.4 MiB
+repetition 6/9, seed=4260868239
+  running baseline
+  completed baseline: MSE=3399.91, improvement=+0.000%, runtime=9.39s, peak RSS=873.6 MiB
+repetition 7/9, seed=882882269
+  running baseline
+  completed baseline: MSE=3406.7, improvement=+0.000%, runtime=9.43s, peak RSS=878.9 MiB
+repetition 8/9, seed=4133003042
+  running baseline
+  completed baseline: MSE=3387.39, improvement=+0.000%, runtime=9.41s, peak RSS=884.1 MiB
+repetition 9/9, seed=4176891961
+  running baseline
+  completed baseline: MSE=3249.86, improvement=+0.000%, runtime=9.56s, peak RSS=889.2 MiB
+requested completed checkpoints: 10/10 in /home/merciera/git/Hybrid-OED/remat_results/multiseed_gpu/scientific
+$ /home/merciera/git/Hybrid-OED/src/remat/run_multiseed_remat.py --child --num-repetitions 10 --master-seed 20250813 --output-dir remat_results/multiseed_gpu --device auto --methods illumination --resume
+2026-10-24 20:48:16.137482: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:48:27.474577: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:48:27.474744: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ***************************************************_________________________________________________
+E1024 20:48:27.474776 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:48:29.039043: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:48:40.407730: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:48:40.407902: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ************************************************************________________________________________
+E1024 20:48:40.407949 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:48:41.876559: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:48:53.236243: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:48:53.236397: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************************************************________________________________
+E1024 20:48:53.236431 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:48:54.710840: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:49:06.044669: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:49:06.044862: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] *****************************************************************************_______________________
+E1024 20:49:06.044893 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:49:07.614531: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:49:18.969912: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:49:18.970124: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] *************************************************************************************_______________
+E1024 20:49:18.970159 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:49:20.495116: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:49:31.837007: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:49:31.837218: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************x*__________________________________________________________________
+E1024 20:49:31.837252 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:49:33.390729: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:49:44.746949: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:49:44.747143: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************x****_______________________________________________________________
+E1024 20:49:44.747176 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:49:46.278368: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:49:57.656484: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:49:57.656685: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************x*******____________________________________________________________
+E1024 20:49:57.656718 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:49:59.159163: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:50:10.530400: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:50:10.530607: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************x*********__________________________________________________________
+E1024 20:50:10.530643 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+2026-10-24 20:50:12.076513: W external/xla/xla/service/hlo_rematerialization.cc:3005] Can't reduce memory use below 7.53GiB (8085265475 bytes) by rematerialization; only reduced to 9.73GiB (10451919552 bytes), down from 9.74GiB (10461831352 bytes) originally
+2026-10-24 20:50:23.425790: W external/xla/xla/tsl/framework/bfc_allocator.cc:497] Allocator (GPU_0_bfc) ran out of memory trying to allocate 9.73GiB (rounded to 10451673344)requested by op 
+2026-10-24 20:50:23.426010: W external/xla/xla/tsl/framework/bfc_allocator.cc:508] ********************************x************_______________________________________________________
+E1024 20:50:23.426052 1205919 pjrt_stream_executor_client.cc:3084] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+  FAILED illumination: XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+Traceback (most recent call last):
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 756, in main
+    arrays, metrics = run_optimized(
+                      ^^^^^^^^^^^^^^
+  File "/home/merciera/git/Hybrid-OED/src/scripts/run_oed_multiseed_full_autodiff.py", line 602, in run_optimized
+    receivers, optimizer_state, loss, auxiliary, gradient = outer_step(
+                                                            ^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 10451673160 bytes.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+Adding baseline as a required paired reference for optimized methods.
+repetition 0/9, seed=732827411
+  baseline: completed, skipping
+  running illumination
+repetition 1/9, seed=789618308
+  baseline: completed, skipping
+  running illumination
+repetition 2/9, seed=149505632
+  baseline: completed, skipping
+  running illumination
+repetition 3/9, seed=441330971
+  baseline: completed, skipping
+  running illumination
+repetition 4/9, seed=3996846613
+  baseline: completed, skipping
+  running illumination
+repetition 5/9, seed=723256431
+  baseline: completed, skipping
+  running illumination
+repetition 6/9, seed=4260868239
+  baseline: completed, skipping
+  running illumination
+repetition 7/9, seed=882882269
+  baseline: completed, skipping
+  running illumination
+repetition 8/9, seed=4133003042
+  baseline: completed, skipping
+  running illumination
+repetition 9/9, seed=4176891961
+  baseline: completed, skipping
+  running illumination
+requested completed checkpoints: 10/20 in /home/merciera/git/Hybrid-OED/remat_results/multiseed_gpu/scientific
+$ /home/merciera/git/Hybrid-OED/src/remat/run_multiseed_remat.py --child --num-repetitions 10 --master-seed 20250813 --output-dir remat_results/multiseed_gpu --device auto --methods waveform_misfit --resume
+Adding baseline as a required paired reference for optimized methods.
+repetition 0/9, seed=732827411
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.456206e-03, carried FWI updates=20
+    round 2/5: objective=8.248069e-04, carried FWI updates=40
+    round 3/5: objective=1.286580e-03, carried FWI updates=60
+    round 4/5: objective=1.517240e-03, carried FWI updates=80
+    round 5/5: objective=6.726577e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=3071.6, improvement=+7.898%, runtime=44.01s, peak RSS=1057.3 MiB
+repetition 1/9, seed=789618308
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.550281e-03, carried FWI updates=20
+    round 2/5: objective=2.935790e-03, carried FWI updates=40
+    round 3/5: objective=2.154993e-03, carried FWI updates=60
+    round 4/5: objective=1.680913e-03, carried FWI updates=80
+    round 5/5: objective=1.697763e-03, carried FWI updates=100
+  completed waveform_misfit: MSE=2906.36, improvement=+16.318%, runtime=42.72s, peak RSS=1108.7 MiB
+repetition 2/9, seed=149505632
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.766942e-03, carried FWI updates=20
+    round 2/5: objective=2.316362e-03, carried FWI updates=40
+    round 3/5: objective=2.218407e-03, carried FWI updates=60
+    round 4/5: objective=1.861656e-03, carried FWI updates=80
+    round 5/5: objective=1.143512e-03, carried FWI updates=100
+  completed waveform_misfit: MSE=2859.23, improvement=+13.610%, runtime=42.68s, peak RSS=1137.9 MiB
+repetition 3/9, seed=441330971
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.272215e-03, carried FWI updates=20
+    round 2/5: objective=9.079025e-04, carried FWI updates=40
+    round 3/5: objective=1.418999e-03, carried FWI updates=60
+    round 4/5: objective=9.705361e-04, carried FWI updates=80
+    round 5/5: objective=5.830633e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=3177.63, improvement=+5.244%, runtime=44.07s, peak RSS=1161.8 MiB
+repetition 4/9, seed=3996846613
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.266024e-03, carried FWI updates=20
+    round 2/5: objective=1.884930e-03, carried FWI updates=40
+    round 3/5: objective=1.721968e-03, carried FWI updates=60
+    round 4/5: objective=1.161223e-03, carried FWI updates=80
+    round 5/5: objective=8.167797e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=3045.23, improvement=+10.079%, runtime=42.69s, peak RSS=1187.0 MiB
+repetition 5/9, seed=723256431
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.444271e-03, carried FWI updates=20
+    round 2/5: objective=1.321833e-03, carried FWI updates=40
+    round 3/5: objective=7.947583e-04, carried FWI updates=60
+    round 4/5: objective=6.252481e-04, carried FWI updates=80
+    round 5/5: objective=4.751604e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=3017.93, improvement=+8.187%, runtime=43.17s, peak RSS=1211.5 MiB
+repetition 6/9, seed=4260868239
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.401217e-03, carried FWI updates=20
+    round 2/5: objective=1.816464e-03, carried FWI updates=40
+    round 3/5: objective=1.173943e-03, carried FWI updates=60
+    round 4/5: objective=1.125626e-03, carried FWI updates=80
+    round 5/5: objective=1.907347e-03, carried FWI updates=100
+  completed waveform_misfit: MSE=3224.11, improvement=+5.171%, runtime=43.04s, peak RSS=1235.8 MiB
+repetition 7/9, seed=882882269
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.284286e-03, carried FWI updates=20
+    round 2/5: objective=2.065523e-03, carried FWI updates=40
+    round 3/5: objective=7.009349e-04, carried FWI updates=60
+    round 4/5: objective=7.941923e-04, carried FWI updates=80
+    round 5/5: objective=1.274857e-03, carried FWI updates=100
+  completed waveform_misfit: MSE=3098.37, improvement=+9.051%, runtime=43.06s, peak RSS=1259.4 MiB
+repetition 8/9, seed=4133003042
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.373559e-03, carried FWI updates=20
+    round 2/5: objective=1.646692e-03, carried FWI updates=40
+    round 3/5: objective=2.516910e-03, carried FWI updates=60
+    round 4/5: objective=1.589609e-03, carried FWI updates=80
+    round 5/5: objective=8.199529e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=2879.48, improvement=+14.994%, runtime=43.33s, peak RSS=1282.2 MiB
+repetition 9/9, seed=4176891961
+  baseline: completed, skipping
+  running waveform_misfit
+    round 1/5: objective=1.269429e-03, carried FWI updates=20
+    round 2/5: objective=1.293646e-03, carried FWI updates=40
+    round 3/5: objective=1.763578e-03, carried FWI updates=60
+    round 4/5: objective=7.622300e-04, carried FWI updates=80
+    round 5/5: objective=6.745866e-04, carried FWI updates=100
+  completed waveform_misfit: MSE=3133.25, improvement=+3.588%, runtime=43.21s, peak RSS=1305.7 MiB
+requested completed checkpoints: 20/20 in /home/merciera/git/Hybrid-OED/remat_results/multiseed_gpu/scientific
+$ /home/merciera/git/Hybrid-OED/src/remat/run_multiseed_remat.py --child --num-repetitions 10 --master-seed 20250813 --output-dir remat_results/multiseed_gpu --device auto --methods oracle --resume
+Adding baseline as a required paired reference for optimized methods.
+repetition 0/9, seed=732827411
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.355854e+03, carried FWI updates=20
+    round 2/5: objective=3.276067e+03, carried FWI updates=40
+    round 3/5: objective=3.147135e+03, carried FWI updates=60
+    round 4/5: objective=3.053804e+03, carried FWI updates=80
+    round 5/5: objective=2.951041e+03, carried FWI updates=100
+  completed oracle: MSE=2951.04, improvement=+11.513%, runtime=41.65s, peak RSS=912.7 MiB
+repetition 1/9, seed=789618308
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.486896e+03, carried FWI updates=20
+    round 2/5: objective=3.352722e+03, carried FWI updates=40
+    round 3/5: objective=3.126793e+03, carried FWI updates=60
+    round 4/5: objective=2.768770e+03, carried FWI updates=80
+    round 5/5: objective=2.579968e+03, carried FWI updates=100
+  completed oracle: MSE=2579.97, improvement=+25.716%, runtime=40.99s, peak RSS=961.4 MiB
+repetition 2/9, seed=149505632
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.407642e+03, carried FWI updates=20
+    round 2/5: objective=3.259824e+03, carried FWI updates=40
+    round 3/5: objective=3.036844e+03, carried FWI updates=60
+    round 4/5: objective=2.724751e+03, carried FWI updates=80
+    round 5/5: objective=2.559266e+03, carried FWI updates=100
+  completed oracle: MSE=2559.27, improvement=+22.673%, runtime=40.83s, peak RSS=986.3 MiB
+repetition 3/9, seed=441330971
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.421159e+03, carried FWI updates=20
+    round 2/5: objective=3.280827e+03, carried FWI updates=40
+    round 3/5: objective=3.069525e+03, carried FWI updates=60
+    round 4/5: objective=2.709418e+03, carried FWI updates=80
+    round 5/5: objective=2.672444e+03, carried FWI updates=100
+  completed oracle: MSE=2672.44, improvement=+20.308%, runtime=40.51s, peak RSS=1005.8 MiB
+repetition 4/9, seed=3996846613
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.468606e+03, carried FWI updates=20
+    round 2/5: objective=3.318804e+03, carried FWI updates=40
+    round 3/5: objective=3.246777e+03, carried FWI updates=60
+    round 4/5: objective=3.117444e+03, carried FWI updates=80
+    round 5/5: objective=3.001916e+03, carried FWI updates=100
+  completed oracle: MSE=3001.92, improvement=+11.358%, runtime=40.49s, peak RSS=1028.6 MiB
+repetition 5/9, seed=723256431
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.453331e+03, carried FWI updates=20
+    round 2/5: objective=3.303377e+03, carried FWI updates=40
+    round 3/5: objective=2.992682e+03, carried FWI updates=60
+    round 4/5: objective=2.720455e+03, carried FWI updates=80
+    round 5/5: objective=2.530592e+03, carried FWI updates=100
+  completed oracle: MSE=2530.59, improvement=+23.013%, runtime=40.08s, peak RSS=1053.4 MiB
+repetition 6/9, seed=4260868239
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.382111e+03, carried FWI updates=20
+    round 2/5: objective=3.319485e+03, carried FWI updates=40
+    round 3/5: objective=3.201439e+03, carried FWI updates=60
+    round 4/5: objective=3.126747e+03, carried FWI updates=80
+    round 5/5: objective=2.955775e+03, carried FWI updates=100
+  completed oracle: MSE=2955.77, improvement=+13.063%, runtime=40.44s, peak RSS=1074.8 MiB
+repetition 7/9, seed=882882269
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.412958e+03, carried FWI updates=20
+    round 2/5: objective=3.333453e+03, carried FWI updates=40
+    round 3/5: objective=3.213593e+03, carried FWI updates=60
+    round 4/5: objective=3.121889e+03, carried FWI updates=80
+    round 5/5: objective=3.044952e+03, carried FWI updates=100
+  completed oracle: MSE=3044.95, improvement=+10.619%, runtime=40.30s, peak RSS=1096.7 MiB
+repetition 8/9, seed=4133003042
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.420063e+03, carried FWI updates=20
+    round 2/5: objective=3.196830e+03, carried FWI updates=40
+    round 3/5: objective=2.914118e+03, carried FWI updates=60
+    round 4/5: objective=2.526541e+03, carried FWI updates=80
+    round 5/5: objective=2.329957e+03, carried FWI updates=100
+  completed oracle: MSE=2329.96, improvement=+31.217%, runtime=39.91s, peak RSS=1122.1 MiB
+repetition 9/9, seed=4176891961
+  baseline: completed, skipping
+  running oracle
+    round 1/5: objective=3.405495e+03, carried FWI updates=20
+    round 2/5: objective=3.328927e+03, carried FWI updates=40
+    round 3/5: objective=3.077991e+03, carried FWI updates=60
+    round 4/5: objective=2.781552e+03, carried FWI updates=80
+    round 5/5: objective=2.696970e+03, carried FWI updates=100
+  completed oracle: MSE=2696.97, improvement=+17.013%, runtime=40.18s, peak RSS=1144.3 MiB
+requested completed checkpoints: 20/20 in /home/merciera/git/Hybrid-OED/remat_results/multiseed_gpu/scientific

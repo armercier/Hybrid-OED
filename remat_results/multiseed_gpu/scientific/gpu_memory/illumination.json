@@ -1,0 +1,9 @@
+{
+  "device": "cuda:0",
+  "methods": [
+    "illumination"
+  ],
+  "peak_device_gib": 2.4092321395874023,
+  "process_wall_s": 373.5438821930438,
+  "status": 0
+}

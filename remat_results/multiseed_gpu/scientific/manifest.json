@@ -1,0 +1,147 @@
+{
+  "config_fingerprint": "ca40761cc1be56b0",
+  "created_utc": "2026-10-24T18:46:33.051358+00:00",
+  "expanded_utc": "2026-10-24T18:57:38.853189+00:00",
+  "mode": "scientific",
+  "requested_methods": [
+    "baseline",
+    "illumination",
+    "waveform_misfit",
+    "oracle"
+  ],
+  "schema_version": 2,
+  "scientific_definition": {
+    "config": {
+      "Lx": 1.1,
+      "Ly": 1.1,
+      "active_receiver_count": 30,
+      "active_source_ids": [
+        1,
+        4,
+        7,
+        10
+      ],
+      "baseline_fwi_updates": 100,
+      "c_max": 3200.0,
+      "c_min": 2100.0,
+      "cfl_safety": 0.8,
+      "density": 1180.0,
+      "design_learning_rate": 4.0,
+      "design_updates": 5,
+      "f0": 25000.0,
+      "f0_max": 25000.0,
+      "fmax_factor": 2.0,
+      "fwi_adam_beta1": 0.9,
+      "fwi_adam_beta2": 0.9,
+      "fwi_learning_rate": 25000000.0,
+      "fwi_updates_per_round": 20,
+      "gradient_smoothing_multiplier": 10.0,
+      "gradient_smoothing_passes": 1,
+      "illumination_alpha_strength": 0.05,
+      "illumination_eps": 1e-12,
+      "illumination_probes": 12,
+      "inclusion_density": 3000.0,
+      "inner_optimizer": "sgd",
+      "pml_kappa_max": 3.0,
+      "pml_polynomial_order": 3,
+      "pml_reflection_coefficient": 1e-06,
+      "pml_thickness_m": 0.1,
+      "points_per_wavelength": 8,
+      "receiver_gradient_method": "full_autodiff",
+      "receiver_grid_count_x": 30,
+      "receiver_grid_count_y": 30,
+      "receiver_max_m": 0.15,
+      "receiver_min_m": -0.15,
+      "scatterer_center_x_m": -0.05,
+      "scatterer_center_y_m": 0.05,
+      "scatterer_side_m": 0.055,
+      "smoke_n_steps": 24,
+      "smoke_test": false,
+      "source_inner_count": 3,
+      "source_inner_max_m": 0.25,
+      "source_inner_min_m": -0.25,
+      "source_side_offset_m": 0.2,
+      "spsa_c_grid": 1.0,
+      "total_time_s": 0.00075
+    },
+    "explicit_repetition_seeds": null,
+    "layout_jitter_grid": 2.0,
+    "master_seed": 20250813,
+    "workflow": "sgd_full_autodiff"
+  },
+  "seed_bundles": [
+    {
+      "fwi_sources": 3109407695,
+      "illumination_probes": 840386926,
+      "layout": 3562573564,
+      "repetition": 732827411,
+      "spsa": 3221491654
+    },
+    {
+      "fwi_sources": 2053814297,
+      "illumination_probes": 21233162,
+      "layout": 4076303957,
+      "repetition": 789618308,
+      "spsa": 2899636511
+    },
+    {
+      "fwi_sources": 1561911114,
+      "illumination_probes": 490080091,
+      "layout": 878408483,
+      "repetition": 149505632,
+      "spsa": 335919567
+    },
+    {
+      "fwi_sources": 4249866369,
+      "illumination_probes": 2504451375,
+      "layout": 1625433870,
+      "repetition": 441330971,
+      "spsa": 704961050
+    },
+    {
+      "fwi_sources": 313912873,
+      "illumination_probes": 3566391704,
+      "layout": 2299572405,
+      "repetition": 3996846613,
+      "spsa": 2438169599
+    },
+    {
+      "fwi_sources": 2952273966,
+      "illumination_probes": 2490599099,
+      "layout": 2240469015,
+      "repetition": 723256431,
+      "spsa": 2907915381
+    },
+    {
+      "fwi_sources": 2509245229,
+      "illumination_probes": 3029728534,
+      "layout": 3547017316,
+      "repetition": 4260868239,
+      "spsa": 3965419350
+    },
+    {
+      "fwi_sources": 4215766019,
+      "illumination_probes": 3945512453,
+      "layout": 2035057921,
+      "repetition": 882882269,
+      "spsa": 2950506233
+    },
+    {
+      "fwi_sources": 1133258129,
+      "illumination_probes": 1361681278,
+      "layout": 1861537488,
+      "repetition": 4133003042,
+      "spsa": 3406104136
+    },
+    {
+      "fwi_sources": 1031897248,
+      "illumination_probes": 3232335202,
+      "layout": 1079510200,
+      "repetition": 4176891961,
+      "spsa": 2266293718
+    }
+  ],
+  "source_notebook": "/home/merciera/git/Hybrid-OED/src/scripts/test_salvus_SH0_illumination_outerloop_receiver_opti.ipynb",
+  "source_notebook_sha256": "0d60fbd4fa96fd363da3630edbf56681a2e307c62f2e1c42ebf9c4cd54ab0bfd",
+  "workflow": "sgd_full_autodiff"
+}

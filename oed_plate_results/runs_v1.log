@@ -1,0 +1,12 @@
+round 0: misfit 0.0172  vs RMSE 21.4  inside 1217  outside std 17.2  | illumination 3.233, max move 2.8 cm  | t=172s
+round 1: misfit 0.0102  vs RMSE 14.5  inside 1182  outside std 10.7  | illumination 3.184, max move 2.7 cm  | t=324s
+round 2: misfit 0.0084  vs RMSE 10.6  inside 1152  outside std 7.5  | illumination 3.251, max move 2.6 cm  | t=476s
+round 3: misfit 0.0079  vs RMSE 9.2  inside 1139  outside std 6.6  | illumination 3.053, max move 2.1 cm  | t=629s
+round 4: misfit 0.0083  vs RMSE 8.7  inside 1134  outside std 6.4  | illumination 3.037, max move 2.1 cm  | t=781s
+final: {'vs_rmse': 8.683258056640625, 'vs_mean_inside': 1133.837158203125, 'vs_std_outside': 6.359758377075195} total 781s
+round 0: misfit 0.0156  vs RMSE 23.0  inside 1232  outside std 17.8  | t=156s
+round 1: misfit 0.0099  vs RMSE 16.3  inside 1197  outside std 11.8  | t=282s
+round 2: misfit 0.0083  vs RMSE 12.0  inside 1167  outside std 8.4  | t=408s
+round 3: misfit 0.0074  vs RMSE 9.9  inside 1143  outside std 7.2  | t=534s
+round 4: misfit 0.0072  vs RMSE 9.1  inside 1132  outside std 6.6  | t=660s
+final: {'vs_rmse': 9.123270034790039, 'vs_mean_inside': 1131.7855224609375, 'vs_std_outside': 6.6040120124816895} total 660s

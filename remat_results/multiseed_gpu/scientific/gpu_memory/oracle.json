@@ -1,0 +1,9 @@
+{
+  "device": "cuda:0",
+  "methods": [
+    "oracle"
+  ],
+  "peak_device_gib": 3.0700595378875732,
+  "process_wall_s": 407.408976348117,
+  "status": 0
+}

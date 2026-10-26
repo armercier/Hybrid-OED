@@ -1,0 +1,9 @@
+  0 data 0.1595 tv -0.0000 | test behind 0.480 before 0.342 | max inertia x1.0 mass x1.00 at (-172,-66) mm  t=20s
+  5 data 0.0986 tv 0.0369 | test behind 0.343 before 0.306 | max inertia x1.2 mass x1.28 at (-147,-13) mm  t=106s
+ 10 data 0.0834 tv 0.0324 | test behind 0.325 before 0.283 | max inertia x1.2 mass x1.63 at (-137,-16) mm  t=189s
+ 15 data 0.0750 tv 0.0287 | test behind 0.310 before 0.269 | max inertia x1.2 mass x2.05 at (-144,-18) mm  t=273s
+ 20 data 0.0698 tv 0.0261 | test behind 0.301 before 0.259 | max inertia x1.1 mass x2.62 at (-147,-13) mm  t=356s
+ 25 data 0.0662 tv 0.0243 | test behind 0.295 before 0.251 | max inertia x1.1 mass x3.36 at (+93,-11) mm  t=439s
+ 30 data 0.0640 tv 0.0230 | test behind 0.288 before 0.247 | max inertia x1.1 mass x4.30 at (+93,+7) mm  t=523s
+ 35 data 0.0624 tv 0.0222 | test behind 0.284 before 0.245 | max inertia x1.1 mass x5.35 at (+73,-1) mm  t=606s
+ 40 data 0.0616 tv 0.0215 | test behind 0.283 before 0.243 | max inertia x1.1 mass x6.31 at (+96,-3) mm  t=690s

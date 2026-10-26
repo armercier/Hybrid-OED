@@ -1,0 +1,8 @@
+/home/merciera/git/Hybrid-OED/src/ldv_assessment/fit_mindlin_ldv.py:55: RuntimeWarning: invalid value encountered in divide
+  ratio = np.log(spec[:, f > 100e3].sum(1) / spec[:, (f > 10e3) & (f < 60e3)].sum(1))
+round 0: loss 0.0290 | cube loc. error 7.2 mm, contrast 1.55, peak mass x1.39 | t=127s
+round 1: loss 0.0205 | cube loc. error 26.7 mm, contrast 0.91, peak mass x1.40 | t=251s
+round 2: loss 0.0151 | cube loc. error 23.2 mm, contrast 0.51, peak mass x1.42 | t=374s
+round 3: loss 0.0124 | cube loc. error 18.0 mm, contrast 0.13, peak mass x1.46 | t=498s
+round 4: loss 0.0111 | cube loc. error 14.5 mm, contrast -0.04, peak mass x1.53 | t=621s
+dense-field prediction error: 0.408 (plain plate with the same filter: 0.437); total 661s

@@ -1,0 +1,143 @@
+{
+  "dx": 0.002,
+  "dt": 3.108161675545263e-07,
+  "wavelet": {
+    "f0": 25000.0,
+    "shift": 0.0
+  },
+  "background": {
+    "vp": 2730.0,
+    "vs": 1340.0,
+    "rho": 1180.0
+  },
+  "results": [
+    {
+      "event": "event_0001",
+      "component": "y",
+      "source_m": [
+        -0.35000000000000003,
+        0.0
+      ],
+      "plane_stress_inclusion": {
+        "all": {
+          "misfit": 0.7765552934430107,
+          "median_corr": 0.7936552721678832,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.9790288826425185,
+          "median_corr": 0.647527854279734,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.39784196512682346,
+          "median_corr": 0.9231165679085962,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 2.588243380188942
+      },
+      "plane_stress_homogeneous": {
+        "all": {
+          "misfit": 0.6081154504408517,
+          "median_corr": 0.8166257254031026,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.7026613503400128,
+          "median_corr": 0.7196130036611272,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.38724709216547765,
+          "median_corr": 0.9273380863764171,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 1.4163264986127615
+      },
+      "acoustic_notebook": {
+        "all": {
+          "misfit": 1.3129480150396289,
+          "median_corr": 0.0027505939741877526,
+          "median_lag_us": 32.978918160000035
+        },
+        "SH0_axis": {
+          "misfit": 1.3141230432082203,
+          "median_corr": 0.0007634850497148146,
+          "median_lag_us": 74.20256586000008
+        },
+        "S0_broadside": {
+          "misfit": 1.3912734149688168,
+          "median_corr": 0.0028350838930712,
+          "median_lag_us": -86.56966017000009
+        },
+        "sign": 1.0
+      }
+    },
+    {
+      "event": "event_0004",
+      "component": "x",
+      "source_m": [
+        0.0,
+        -0.35000000000000003
+      ],
+      "plane_stress_inclusion": {
+        "all": {
+          "misfit": 0.7149061239274567,
+          "median_corr": 0.8108668057943087,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.8815454630046655,
+          "median_corr": 0.6949625770766976,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.3930026693928948,
+          "median_corr": 0.9253713763246214,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 1.413449052721262
+      },
+      "plane_stress_homogeneous": {
+        "all": {
+          "misfit": 0.6055136324019296,
+          "median_corr": 0.816379956381376,
+          "median_lag_us": 0.0
+        },
+        "SH0_axis": {
+          "misfit": 0.6980385016880721,
+          "median_corr": 0.7193108999227082,
+          "median_lag_us": 0.0
+        },
+        "S0_broadside": {
+          "misfit": 0.3851229166839685,
+          "median_corr": 0.9281976365502145,
+          "median_lag_us": 0.0
+        },
+        "sign": 1.0,
+        "solve_s": 1.4086691122502089
+      },
+      "acoustic_notebook": {
+        "all": {
+          "misfit": 1.3107048378465835,
+          "median_corr": -0.0004212971252031372,
+          "median_lag_us": 28.856553390000034
+        },
+        "SH0_axis": {
+          "misfit": 1.3120966409303338,
+          "median_corr": -0.001017971943252912,
+          "median_lag_us": 74.20256586000008
+        },
+        "S0_broadside": {
+          "misfit": 1.3897235588986447,
+          "median_corr": 0.001136337066356449,
+          "median_lag_us": -86.56966017000009
+        },
+        "sign": 1.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "tag": "oracle_none_gpu_K20",
+  "remat": "none",
+  "method": "oracle",
+  "device": "gpu",
+  "updates": 20,
+  "seed": 0,
+  "compile_only": true,
+  "platform": "cuda:0",
+  "compile_s": 6.0486635491251945,
+  "xla_temp_gib": 65.41993889212608,
+  "xla_total_gib": 65.42026809230447
+}

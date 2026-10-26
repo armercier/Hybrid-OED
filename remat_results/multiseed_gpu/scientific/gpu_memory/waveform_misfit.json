@@ -1,0 +1,9 @@
+{
+  "device": "cuda:0",
+  "methods": [
+    "waveform_misfit"
+  ],
+  "peak_device_gib": 5.853403091430664,
+  "process_wall_s": 434.039017630741,
+  "status": 0
+}

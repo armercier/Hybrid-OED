@@ -1,0 +1,13 @@
+  ratio = np.log(spec[:, f > 100e3].sum(1) / spec[:, (f > 10e3) & (f < 60e3)].sum(1))
+11229 traces kept (0 with dropout spikes removed), window t < 650 us; start source [-0.097 -0.005]
+grid 1144 x 702 at 0.50 mm, 8612 steps, sponge 120 cells
+vs=1300 h=9.0 mm kappa=0.891: best test misfit 0.700 (train 0.673) src=(-0.097,-0.005)  t=58s
+vs=1300 h=10.0 mm kappa=0.892: best test misfit 0.589 (train 0.565) src=(-0.097,-0.005)  t=116s
+vs=1300 h=11.0 mm kappa=0.892: best test misfit 0.561 (train 0.546) src=(-0.097,-0.005)  t=173s
+vs=1340 h=9.0 mm kappa=0.891: best test misfit 0.611 (train 0.586) src=(-0.097,-0.005)  t=230s
+vs=1340 h=10.0 mm kappa=0.892: best test misfit 0.556 (train 0.541) src=(-0.097,-0.005)  t=287s
+vs=1340 h=11.0 mm kappa=0.892: best test misfit 0.601 (train 0.596) src=(-0.097,-0.005)  t=345s
+vs=1380 h=9.0 mm kappa=0.891: best test misfit 0.557 (train 0.541) src=(-0.097,-0.005)  t=402s
+vs=1380 h=10.0 mm kappa=0.891: best test misfit 0.588 (train 0.583) src=(-0.097,-0.005)  t=459s
+vs=1380 h=11.0 mm kappa=0.892: best test misfit 0.667 (train 0.667) src=(-0.097,-0.005)  t=517s
+best: {'vs': 1340.0, 'h': 0.01, 'kappa': 0.8916276995628561, 'src': [-0.097, -0.005], 'test': 0.5555724930763097, 'train': 0.5414402000562767}

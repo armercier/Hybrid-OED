@@ -1,0 +1,92 @@
+Adding baseline as a required paired reference for optimized methods.
+repetition 0/9, seed=732827411
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=3.121157e+01, carried FWI updates=20
+    round 2/5: objective=5.053430e+01, carried FWI updates=40
+    round 3/5: objective=1.779946e+01, carried FWI updates=60
+    round 4/5: objective=1.623593e+01, carried FWI updates=80
+    round 5/5: objective=1.127944e+01, carried FWI updates=100
+  completed illumination: MSE=3158.24, improvement=+5.300%, runtime=40.51s, peak RSS=1008.4 MiB
+repetition 1/9, seed=789618308
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.661299e+01, carried FWI updates=20
+    round 2/5: objective=2.006254e+01, carried FWI updates=40
+    round 3/5: objective=1.591184e+01, carried FWI updates=60
+    round 4/5: objective=1.867822e+01, carried FWI updates=80
+    round 5/5: objective=1.627904e+01, carried FWI updates=100
+  completed illumination: MSE=2340.08, improvement=+32.623%, runtime=36.76s, peak RSS=1085.1 MiB
+repetition 2/9, seed=149505632
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.896974e+01, carried FWI updates=20
+    round 2/5: objective=2.478518e+01, carried FWI updates=40
+    round 3/5: objective=2.371711e+01, carried FWI updates=60
+    round 4/5: objective=1.504372e+01, carried FWI updates=80
+    round 5/5: objective=1.171845e+01, carried FWI updates=100
+  completed illumination: MSE=2971.62, improvement=+10.214%, runtime=36.67s, peak RSS=1127.5 MiB
+repetition 3/9, seed=441330971
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.790351e+01, carried FWI updates=20
+    round 2/5: objective=3.524656e+01, carried FWI updates=40
+    round 3/5: objective=5.718797e+01, carried FWI updates=60
+    round 4/5: objective=9.578140e+00, carried FWI updates=80
+    round 5/5: objective=1.174121e+01, carried FWI updates=100
+  completed illumination: MSE=2794.44, improvement=+16.670%, runtime=36.93s, peak RSS=1169.1 MiB
+repetition 4/9, seed=3996846613
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.701329e+01, carried FWI updates=20
+    round 2/5: objective=2.549020e+01, carried FWI updates=40
+    round 3/5: objective=1.824165e+01, carried FWI updates=60
+    round 4/5: objective=1.948529e+01, carried FWI updates=80
+    round 5/5: objective=2.839374e+01, carried FWI updates=100
+  completed illumination: MSE=2396.99, improvement=+29.221%, runtime=36.86s, peak RSS=1210.4 MiB
+repetition 5/9, seed=723256431
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=3.236493e+01, carried FWI updates=20
+    round 2/5: objective=4.760152e+01, carried FWI updates=40
+    round 3/5: objective=4.572381e+01, carried FWI updates=60
+    round 4/5: objective=1.515115e+01, carried FWI updates=80
+    round 5/5: objective=1.517633e+01, carried FWI updates=100
+  completed illumination: MSE=2794.27, improvement=+14.992%, runtime=36.81s, peak RSS=1251.3 MiB
+repetition 6/9, seed=4260868239
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=2.258674e+01, carried FWI updates=20
+    round 2/5: objective=1.650007e+01, carried FWI updates=40
+    round 3/5: objective=2.817165e+01, carried FWI updates=60
+    round 4/5: objective=1.115401e+01, carried FWI updates=80
+    round 5/5: objective=1.156405e+01, carried FWI updates=100
+  completed illumination: MSE=2966.18, improvement=+12.757%, runtime=36.56s, peak RSS=1292.7 MiB
+repetition 7/9, seed=882882269
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=3.207927e+01, carried FWI updates=20
+    round 2/5: objective=3.095509e+01, carried FWI updates=40
+    round 3/5: objective=1.978680e+01, carried FWI updates=60
+    round 4/5: objective=1.216730e+01, carried FWI updates=80
+    round 5/5: objective=2.196296e+01, carried FWI updates=100
+  completed illumination: MSE=2952.1, improvement=+13.344%, runtime=36.90s, peak RSS=1334.0 MiB
+repetition 8/9, seed=4133003042
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.152835e+01, carried FWI updates=20
+    round 2/5: objective=3.464110e+01, carried FWI updates=40
+    round 3/5: objective=2.118082e+01, carried FWI updates=60
+    round 4/5: objective=6.568740e+00, carried FWI updates=80
+    round 5/5: objective=1.726405e+01, carried FWI updates=100
+  completed illumination: MSE=3013.73, improvement=+11.031%, runtime=36.95s, peak RSS=1375.7 MiB
+repetition 9/9, seed=4176891961
+  baseline: completed, skipping
+  running illumination
+    round 1/5: objective=1.823712e+01, carried FWI updates=20
+    round 2/5: objective=2.761084e+01, carried FWI updates=40
+    round 3/5: objective=2.079470e+01, carried FWI updates=60
+    round 4/5: objective=1.631918e+01, carried FWI updates=80
+    round 5/5: objective=2.422207e+01, carried FWI updates=100
+  completed illumination: MSE=2574.5, improvement=+20.781%, runtime=36.60s, peak RSS=1416.8 MiB
+requested completed checkpoints: 20/20 in /home/merciera/git/Hybrid-OED/remat_results/multiseed_gpu/scientific

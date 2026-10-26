@@ -1,0 +1,12 @@
+round 0: loss 0.0574 | cube loc. error 54.2 mm, contrast -0.33, peak mass x1.50 | design objective 3.671, max move 14.1 mm | t=297s
+round 1: loss 0.0436 | cube loc. error 3.5 mm, contrast -1.06, peak mass x1.62 | design objective 5.219, max move 14.1 mm | t=607s
+round 2: loss 0.0383 | cube loc. error 5.8 mm, contrast -1.22, peak mass x1.78 | design objective 3.501, max move 12.9 mm | t=913s
+round 3: loss 0.0292 | cube loc. error 3.4 mm, contrast -0.99, peak mass x1.90 | design objective 3.568, max move 12.6 mm | t=1219s
+round 4: loss 0.0297 | cube loc. error 3.4 mm, contrast -0.71, peak mass x2.10 | t=1526s
+dense-field prediction error: 0.287 (plain plate with the same filter: 0.321); total 1566s
+round 0: loss 0.0574 | cube loc. error 54.2 mm, contrast -0.33, peak mass x1.50 | design objective 3.054, max move 14.1 mm | t=296s
+round 1: loss 0.0391 | cube loc. error 4.8 mm, contrast -1.01, peak mass x1.65 | design objective 3.809, max move 13.9 mm | t=610s
+round 2: loss 0.0298 | cube loc. error 5.8 mm, contrast -1.87, peak mass x1.67 | design objective 3.337, max move 12.2 mm | t=922s
+round 3: loss 0.0254 | cube loc. error 5.8 mm, contrast -1.96, peak mass x1.64 | design objective 3.390, max move 12.4 mm | t=1236s
+round 4: loss 0.0239 | cube loc. error 12.6 mm, contrast -1.73, peak mass x1.66 | t=1549s
+dense-field prediction error: 0.259 (plain plate with the same filter: 0.326); total 1589s
