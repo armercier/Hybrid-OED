@@ -3,6 +3,8 @@
 Plate: 500 x 250 x 1 mm metal sheet (light, presumably aluminium), four 1 g / 10 mm PZT discs, LDV scan
 on the front face, defects machined from the back face.
 
+**Drawing:** `specimen_thin_drawing.pdf` (front and back views, section, table with both coordinate frames).
+
 **Goal of the day:** plate characterised, acquisition parameters fixed, a pristine reference scan
 (before machining) saved, defects machined, and the dense scan running unattended over the weekend.
 
