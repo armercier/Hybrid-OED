@@ -1012,3 +1012,9 @@ specimen drawing, setup photo. Cost figure dropped (item 120). Compiles, no unde
 Appendix B now holds only the 2- and 1-shot sensor paths (Figs. 10, 11; referenced from 7.5), the specimen drawing and the
 setup photo. Removed (files kept in figures/): F8_pairs (13 pairs), F8b, F8c, F8d (fixed-budget figures).
 
+
+## 123. Handoff note for a local session (25 Nov)
+
+reports/2026-11_mssp_paper/notes/handoff.md: where everything is, agreed storyline and wording, figure set with
+generating scripts, status, next steps and deadlines (supervisor Fri 27 Nov, poster ~9 Dec), writing conventions, what
+needs eegdevtest, git workflow on branch mssp-paper. Paper .gitignore re-includes figures/ (root .gitignore drops *.pdf, *.png).
