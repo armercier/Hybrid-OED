@@ -1,0 +1,14 @@
+# LaTeX build files and the compiled PDF (rebuild with latexmk -pdf main.tex)
+*.aux
+*.log
+*.fdb_latexmk
+*.fls
+*.out
+*.toc
+*.synctex.gz
+*.bbl
+*.blg
+/main.pdf
+# photo originals stay on the server; only the JPG copies used by the figures are versioned
+LDV_photos/*.HEIC
+LDV_photos/*.heic

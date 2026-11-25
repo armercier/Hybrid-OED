@@ -1,0 +1,158 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,margin=1.7cm]{geometry}
+\usepackage{graphicx,booktabs,tabularx,enumitem,xcolor,caption,float}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\captionsetup{font=small,labelformat=empty}
+\newcommand{\status}[1]{\textcolor{gray}{\small[\emph{#1}]}}
+\pagestyle{empty}
+\begin{document}
+
+{\Large\bfseries Outline: MSSP paper}\hfill{\small draft, 20 Nov 2026 (decisions and run log in \texttt{storyline.md})}\\[2pt]
+\textbf{Working title:} Adaptive laser-vibrometer sensor placement for guided-wave defect imaging by differentiable full-waveform inversion\\
+\textbf{Target:} Mechanical Systems and Signal Processing. Fallbacks: NDT\&E International, Ultrasonics.\\
+\textbf{Claim:} At a fixed number of LDV sensors, moving them along the gradient of an illumination criterion while full-waveform inversion runs images the features of a 10\,mm PMMA plate better than random moves of the same lengths in most cases (10 of 13 pairs over 1, 2 and 4 shots), without prior knowledge of the defects.\\
+\textbf{Comparison:} equal sensor count (30--31) and equal move lengths; adaptive vs random moves from the same regular, jittered or random start; static start and full scan as references.\\
+\textbf{Extends:} NeurIPS 2026 Sim2Science workshop paper (2-D acoustic, synthetic); the numerical study and its CPU numbers are kept as Part I. Cite it; check that the workshop is non-archival.
+
+\subsection*{Storyline}
+\emph{Part I: numerical study (methods and cost).}
+\begin{enumerate}
+\item \textbf{Problem.} A dense LDV scan takes hours (6418 points, about 7\,h). Can a differentiable design place a fixed number of sensors better than fixed or random placement?
+\item \textbf{Method.} Nested loop (F1): $K$ FWI updates on the current data, then one gradient step on the receiver positions; three design objectives: oracle (needs the true model), waveform misfit (needs data at unmeasured points), stochastic illumination (Rademacher probes, per-source sensitivities, $\mathrm{var}(h/\bar h)-\beta\log\bar h$; needs neither).
+\item \textbf{Numerical study (2-D acoustic, 10 seeds, fixed sensor count; F2).} Improvement over the fixed layout: oracle 18.6\,\%, illumination 16.7\,\%, waveform misfit 9.4\,\%, each 10/10 seeds. Illumination comes close to the oracle without a true model or extra data, so it is the objective taken to the lab.
+\item \textbf{Cost (F10).} One design gradient ($K=20$): the workshop implementation needs 10--66\,GiB. Rematerialisation (checkpointing) cuts memory 4--15$\times$ with identical gradients (difference $<10^{-5}$) at a CPU cost of +20\,\% (oracle, misfit) to 2.7$\times$ (illumination); it brings every objective within one 11\,GB GPU, which runs the full study in 22\,min instead of 4.2\,h on the CPU (10--17$\times$ per run). Same results to 0.3\,\%.
+\end{enumerate}
+\emph{Part II: laboratory (Mindlin plate, LDV).}
+\begin{enumerate}[resume]
+\item \textbf{Specimen and data.} 10\,mm PMMA plate, 3-D LDV, four holes (D1, D2, D4 blind; D3 through) and a glued steel cube M1; scans with 1, 2 and 4 shots. Every result-producing step is blind to the defects (blind robust self-calibration, ``no surface'' points from amplitude); the defects are used only for scoring.
+\item \textbf{Forward model (F3).} Mindlin plate (A0, damped, PZT blocks as masses) fits the pristine scan (misfit 0.028; Salvus 3-D 0.037); it has no S0 (about 1\,\% of the energy). With the as-built defects it explains little (0.076 vs 0.082 without), while Salvus 3-D with the same geometry reaches 0.043, as good as the blind inversion (0.042): the plate model's through-hole and glued mass are the main model error.
+\item \textbf{Model error and scoring.} The inversion renders M1 and D3 as stiff plugs with a thin ring. Practical stance: an unmodelled feature must at least be \emph{located} and \emph{contained}. Anomaly $a=|h-10\,\mathrm{mm}|$; found if $a>3$\,mm within 8\,mm; false indications $a>1$\,mm more than 20\,mm (about half an A0 wavelength) from every feature; background RMS; ranking found, false indications, background RMS (F7).
+\item \textbf{Main experiment.} 30--31 sensors, 5 rounds of 20 FWI updates; adaptive (illumination gradient) vs random moves with the same per-sensor step lengths, from regular, jittered and random starts; 3 pairs with 4 shots, 5 with 2, 5 with 1.
+\item \textbf{Result (F8, F9).} Adaptive ranks above random in 10 of 13 pairs (4 shots 3/3, 2 shots 4/5, 1 shot 3/5). With 4 shots it is the only strategy that finds the small hole D4, and the best 30-point map of the study comes from it (5/5 found, 64 false indications). Better on all three measures at once in 5 of 13 pairs; failures exist. Both moving strategies beat the static layout most of the time (more distinct points), so the fair comparison is at equal sensor count and move length.
+\item \textbf{Limitations, stated openly.} 13 pairs (7 of 10 on the pairs scored after the scoring was fixed, $p=0.17$); random moves end closer to their start (net 13--14 vs 24--29\,mm), so part of the gain may come from sweeping farther; the illumination score does not rank static layouts reliably; sparse runs spill around unmodelled features (19--45\,mm vs 10--16\,mm for full scans); no S0, plate edges not modelled, vz only.
+\item \textbf{Take-home.} The numerical study shows the method and its cost; the lab shows that gradient-directed sensor moves carry over to real LDV data as a consistent, not guaranteed, improvement over random moves. The full 1-shot scan still finds every feature with 3 false indications, so better criteria and models that contain unmodelled features are where the remaining gap lies.
+\end{enumerate}
+
+\subsection*{Sections (about 25 pages, 9 figures)}
+\small
+\begin{tabularx}{\linewidth}{@{}l l X c l@{}}
+\toprule
+\# & Section & Content & Story & Figures\\ \midrule
+1 & Introduction & LDV guided-wave imaging, scan time, OED for sensor placement, contributions & 1 & \\
+2 & Method & Nested loop, FWI, the three design objectives, rematerialisation & 2 & F1\\
+3 & Numerical study & 2-D acoustic, 10 seeds: oracle vs waveform misfit vs illumination vs fixed; example maps and receiver paths; CPU, CPU + remat, GPU + remat cost & 3, 4 & F2, F2b, F10\\
+4 & Laboratory experiment & PMMA plate, PZT sources, D1--D4 and M1, 3-D LDV, 1/2/4-shot scans & 5 & F4\\
+5 & Plate model, calibration, check & Mindlin plate, blind robust self-calibration (table: s, Q, sources, misfit, correlation), waveforms LDV vs Mindlin vs Salvus 3-D & 6 & F3\\
+6 & Full-scan inversion and scoring & Blind full-scan maps (1, 2, 4 shots), plugs at M1 and D3, detect--locate--contain scoring & 7 & F7\\
+7 & Adaptive sensor moves on LDV data & 13 pairs adaptive vs random, static start and full scan as references; sensor paths & 8, 9 & F8, F9\\
+8 & Discussion, conclusion & Model error and containment, sweeping confound, scan-time saving, transfer to metal plates & 10, 11 & \\
+\bottomrule
+\end{tabularx}
+\normalsize
+
+\subsection*{Gaps before submission}
+\begin{enumerate}
+\item Final figures: F4 specimen photo. F1, F3, F7, F8, F9, F10 done (final drafts, Crameri colour maps: vik for thickness, oslo for everything else). Old F3 (earlier cube scan), F5 (pristine difference) and F6 (calibration traces, now covered by the pristine row of F3) moved out of the main body (appendix or dropped).
+\item Workshop figures brought in and restyled from the workshop data (no new runs): F2 (paired improvement, runtime vs improvement), F2b (true model, reconstructions, receiver paths); the workshop cost-per-run figure is replaced by F10.
+\item Write the scoring definition and the pair statistics (sign test) in Section 7; disclose the sweeping confound.
+\item Dropped for the deadline: live closed loop, fixed-heading control, waveform-misfit objective in the lab, new synthetic reruns.
+\end{enumerate}
+
+\clearpage
+\section*{Figure drafts}
+\status{existing} = an existing project figure, to be restyled. \status{schematic} = a sketch of the intended figure, no data yet.
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F1_loop.pdf}
+\caption{\textbf{F1 Concept.} Nested differentiable design loop (from the workshop paper), recoloured to the paper palette: measure at $\mathbf{p}^t$, $K$ FWI updates, evaluate the design objective, move the receivers along its gradient, measure again. \status{final draft; optional: swap the 2-D acoustic maps for the plate}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\begin{minipage}[t]{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/F2_numerical.pdf}
+\caption{\textbf{F2 Numerical study} (2-D acoustic, 30 receivers, 10 seeds): (a) paired improvement of the final model MSE over the fixed layout (illumination 16.7\,\%, waveform misfit 9.4\,\%, oracle 18.6\,\%, each 10/10); (b) the same against the total CPU runtime per run. \status{final draft; workshop data}}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.48\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/F10_remat.pdf}
+\caption{\textbf{F10 Cost} of one design gradient ($K=20$, 2-D acoustic study): CPU with the workshop implementation, CPU with rematerialisation, GPU with rematerialisation. Remat cuts memory 4--15$\times$ at a CPU cost of +20\,\% to 2.7$\times$, with identical gradients; on the GPU the full study takes 22\,min instead of 4.2\,h. \status{final draft}}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.85\linewidth]{figures/F2b_numerical_maps.pdf}
+\caption{\textbf{F2b Numerical example} (workshop run): (a) true model with the fixed sources and the initial receiver line; (b) fixed-layout reconstruction; (c--e) reconstructions after 5 design rounds with the receiver paths, for illumination, waveform misfit and the oracle; MSE change relative to (b). \status{final draft; workshop data, no new runs}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F3_waveforms.pdf}
+\caption{\textbf{F3 Forward-model check.} LDV vs Mindlin vs Salvus 3-D (full plate, free edges, PZT blocks, as-built holes and glued cube), same source-signature fit for every model; misfit over all files and points. Pristine plate: Mindlin 0.028 (calibrated on this scan), Salvus 0.037. Defect plate: Mindlin pristine 0.082, Mindlin as built (thinning, rigid cube) 0.076, Salvus as built 0.043, Mindlin blind inversion 0.042. The plate model is adequate for the intact plate; its representation of the through-hole and the glued mass is the weak point, which the blind inversion compensates with plugs. \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F4_specimen.pdf}
+\caption{\textbf{F4 Specimen.} (a) Front face (LDV side), positions from the scan centre O; (b) photo of the plate, top-down through the transparent PMMA, resampled into the same frame (homography on 9 control points, residuals $\le 2$\,mm) and annotated. Specimen: 10\,mm PMMA plate (900$\times$835\,mm), four PZT sources (10$\times$10$\times$7\,mm blocks, back face), blind holes D1, D2 (10\,mm) and D4 (8\,mm) 6\,mm deep from the back, through-hole D3 (10\,mm), glued steel cube M1 (10\,mm, back); dashed outlines = back face. Full drawing in Appendix Fig.~A1, laboratory setup in Fig.~A2. \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F7_fullscans.pdf}
+\caption{\textbf{F7 Blind full-scan inversions} with 4, 2 and 1 shots, and the scoring geometry (8\,mm detection radius, 20\,mm false-alarm zone). All five features are found in every case; the cube M1 and the through-hole D3 appear as stiff plugs with a thin ring. \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{figures/F8_pairs.pdf}
+\caption{\textbf{F8 Main result.} All 13 pairs: adaptive design (circle) vs random moves with the same step lengths (triangle) from the same start; static start (square) and full scan (dashed) as references. Rows: features found of 5, false indications, background RMS. Ticks mark pairs where adaptive ranks above random (10 of 13). \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{figures/F8b_matched_budget.pdf}
+\caption{\textbf{F8b Same scan-time budget} (candidate main result, for discussion): 30 measured LDV points (about 2\,min of scanning instead of 7\,h), 4 and 2 shots. Static layouts (regular, jittered, random; line = median) vs adaptive illumination design (3 groups of 10, each group designed on the current inverted model; same 100 inversion updates, of which only 34 use all 30 points); simulation designs (designed once on the defect-free model) and earlier designs (greedy, early settings) for completeness. Numbers: runs that find all five features. The adaptive runs find all five (static 1/8 and 0/7, missing mostly D4), with false indications and background RMS within or below the static range. \status{draft; n = 1 adaptive run per setting, more queued}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F8c_detection_curves.pdf}
+\caption{\textbf{F8c Detection curves at the same budget} (30 measured points). One threshold $t$ on $|h-10\,\mathrm{mm}|$, swept from 5\,mm (left end) to 1\,mm (right end), sets both what counts as a found feature (within 8\,mm) and what counts as a false indication (background cell farther than 20\,mm from every feature); open markers: $t = 3$\,mm (v3). Mean features found vs median false indications per method. Adaptive design as run, with the log criterion, and the progressive static control lie close to the static layouts; the adaptive points re-inverted like a static layout lie above static at 2 and 1 shots, and the simulation designs above all at 4 shots. Pre-registered paired tests: adaptive vs progressive static 7/14, log vs old criterion 6/12 (no effect). \status{draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F8d_fixed_rate.pdf}
+\caption{\textbf{F8d Features found at a fixed false-indication rate} (exploratory, chosen after the pre-registered tests). The threshold of each map is the 99th (top) or 95th (bottom) percentile of its own background anomaly, so every map has 1\,\% (5\,\%) false indications and methods differ only in detection (CFAR-type rule). Bars: mean; numbers: runs finding all five. At 1\,\%, the adaptive points re-inverted like a static layout find more than the progressive static control in 10 of 14 pairs (same in 3, fewer in 1; sign test $p = 0.006$) and more than the same start layout in 5 of 10 (fewer in 1); the moving array with gradient moves finds all five in 7 of 13 runs vs 1 of 13 with random moves. Right of the divider: all positions visited by the moving arrays ($\approx$145) inverted jointly, and a static jittered layout with the same number of points (proposal A, running). \status{draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.8\linewidth]{figures/F10a_funnel.pdf}
+\caption{\textbf{F10a Where the design helps: from relaxed to strict} (exploratory). Gain in features found (of 5) of the designed variant over its baseline; diamonds: pooled gain with 95\,\% bootstrap interval; open markers: gain at 4, 2 and 1 shots. Left: fixed 1\,\% false-indication rate; right: v3 (pre-registered). (i) equal inversion cost: 30 sensors moved along the illumination gradient vs static 30 points; blue: the same moves planned beforehand on a best-case model (calibrated on the full defect scan); grey: random moves. (ii) equal scan cost: adaptive points re-inverted in one pass; blue: 30 points designed beforehand. (iii) equal scan and inversion cost. (iv) about 145 points: all positions visited by the moving arrays, inverted in one pass, vs a static layout of the same size (4 and 2 shots). \status{draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/F10b_slopes.pdf}
+\caption{\textbf{F10b Paired view of F10a} (1\,\% false-indication rate). Each line is one start layout, from its baseline to its designed variant; counts of start layouts that find more, the same or fewer features. \status{draft, companion to F10a}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{figures/F9_paths_ad_j30a.pdf}
+\caption{\textbf{F9 Where the sensors go, 4 shots} (best adaptive run, j30a start). (a) full scan, (b) static start, (c) random moves, (d) adaptive design. Adaptive sensors sweep straight lines and find D4; random moves stay near their start. \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{figures/F9_paths_a2_x48c.pdf}
+\caption{\textbf{F9b, 2 shots} (best adaptive run, x48c start): all five features found, but a thin band along the lower edge (568 false indications). \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.9\linewidth]{figures/F9_paths_a1_j30b.pdf}
+\caption{\textbf{F9c, 1 shot} (best adaptive run, j30b start): 4 of 5 found with 88 false indications, against 2 of 5 for the static start. \status{final draft}}
+\end{figure}
+
+\section*{Appendix figures}
+\begin{figure}[H]\centering
+\includegraphics[width=\linewidth]{figures/A1_specimen_full.pdf}
+\caption{\textbf{A1 Specimen drawing} (as built): front and back faces, section and coordinate table. PZT blocks 10$\times$10$\times$7\,mm, 5.3\,g. \status{final draft}}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.5\linewidth]{figures/A2_setup_edited.pdf}
+\caption{\textbf{A2 Laboratory setup}: 3-D scanning laser vibrometer on a robot above the PMMA plate (on foam supports); the white sheet marks the scan area; the three green beams converging on one scan point are drawn for illustration. \status{final draft}}
+\end{figure}
+
+\end{document}

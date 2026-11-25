@@ -1,0 +1,46 @@
+% Neutral wrapper for drafting. Each section lives in sections/*.tex and contains no preamble material, so the same
+% files can be \input by the thesis template or a journal class later. Packages used by the sections are listed here.
+\documentclass[11pt]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,multirow}
+\usepackage{graphicx}
+% siunitx if installed (thesis template has it); minimal stand-ins otherwise
+\IfFileExists{siunitx.sty}{\usepackage{siunitx}}{%
+  \newcommand{\SI}[2]{##1\,##2}\newcommand{\num}[1]{##1}%
+  \newcommand{\SIrange}[3]{##1--##2\,##3}}
+\usepackage[colorlinks,allcolors=blue!50!black]{hyperref}
+\usepackage{xcolor}
+\graphicspath{{figures/}}
+% drafting aids: remove for submission
+\newcommand{\note}[1]{\textcolor{red!70!black}{[#1]}}
+% notes block at the head of each section: what has to go in it (drafting only)
+\newenvironment{notes}{\par\color{red!70!black}\small\noindent\textbf{Notes for this section}\begin{itemize}\setlength\itemsep{0pt}}{\end{itemize}\normalcolor\normalsize}
+
+\title{Differentiable adaptive sensor placement for guided-wave thickness imaging:\\ from synthetic studies to laser-vibrometer data}
+\author{draft}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\input{sections/sec1_introduction}
+\input{sections/sec2_method}
+\input{sections/sec3_numerical}
+\input{sections/sec4_experiment}
+\input{sections/sec5_model}
+\input{sections/sec6_fullscan_scoring}
+\section{Sensor design on laser-vibrometer data}\label{sec:lab-design}
+\input{sections/sec7_1_protocols}
+\input{sections/sec7_2_case_i}
+\input{sections/sec7_3_case_ii}
+\input{sections/sec7_4_case_iii}
+\input{sections/sec7_5_paths}
+\input{sections/sec8_discussion}
+\input{sections/sec9_conclusion}
+
+\appendix
+\input{sections/appA_protocols}
+\input{sections/appB_figures}
+
+\end{document}

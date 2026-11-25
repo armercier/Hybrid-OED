@@ -1,0 +1,11 @@
+% Section 1: Introduction.
+\section{Introduction}\label{sec:intro}
+\begin{notes}
+\item Motivation: full-field LDV scans of plates give dense guided-wave data but are slow (here 6418 points, about 7\,h per shot); thickness imaging by full-waveform inversion (FWI) needs far fewer points if they are well placed.
+\item Context: optimal experimental design (OED) for sensor placement in NDT/SHM and seismic imaging (greedy / D-, A-optimal selection, Bayesian OED); differentiable and adaptive design; scanning-LDV guided-wave imaging. Reviewer Xw48 (NeurIPS) asked for a comparison with greedy selection: we tried greedy log-det selection on the plate (failed, log items 30, 35--36) -- mention or put in the appendix.
+\item Gap: adaptive, gradient-based sensor design has been shown on synthetic data; whether it helps on real laboratory data, with model error, is open.
+\item This paper (thesis chapter, extension of the NeurIPS workshop paper): (1) the method and its cost (rematerialisation makes the design gradient fit one 11\,GB GPU); (2) a laboratory test on a PMMA plate with blind processing; (3) an honest account of where adaptivity helps: three comparisons from relaxed to strict.
+\item Contributions list to finalise after the results of 24 Nov (case (i) with the random and offline controls; whether simulation design stays).
+\item Outline of the paper (one sentence per section).
+\item Contributions (25 Nov framing): (1) method and cost; (2) blind laboratory test on LDV data with model error; (3) the design places a movable array well (beats static and random), adaptively and without a prior model, matching a best-case advance plan; (4) an honest account from relaxed to strict comparisons, including where uniform coverage is as good.
+\end{notes}

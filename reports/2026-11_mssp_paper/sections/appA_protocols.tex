@@ -1,0 +1,62 @@
+% Appendix A: settings of the acquisition strategies and statistics (details moved out of Section 7.1).
+% Facts: ldv_processing_log.md items 30-31, 39-40, 50, 55, 60-61, 81, 89, 93, 96, 104-114.
+
+\section{Settings of the laboratory study}\label{app:protocols}
+
+\paragraph{Replay.} A requested position is snapped to the nearest scanned point not yet taken in the same round
+(at most \SI{3}{mm} away on the \SI{3}{mm} scan grid). Points flagged as dropouts or ``no surface''
+(Section~\ref{sec:model}) are unusable in the replay as in the dense scan. The time needed to reposition the laser
+heads is not included; it is small compared with the averaging time per point (about \SI{3.8}{s} per point and shot).
+
+\paragraph{Start layouts.} Thirty points on the scan area: a cell-centred $6\times5$ regular grid; jittered layouts
+with one random point in each cell of the $6\times5$ grid (seeds a--d); random layouts of 30--31 points (seeds a--d);
+and, with four shots, a corner-anchored regular grid of \SI{48}{mm} spacing. With one shot some points of the
+two-shot start layouts are dropouts, which leaves 24--31 usable points; the strategies compared on such a start use
+the same points.
+
+\begin{table}[ht]\centering\small
+\caption{Settings of the strategies. Probes: Rademacher vectors per evaluation of the illumination criterion.}
+\label{tab:settings}
+\begin{tabularx}{\linewidth}{@{}l X X X@{}}
+\toprule
+ & adaptive batches & gradient / random moves & designed beforehand \\ \midrule
+points or sensors & 30 in 3 batches of 10, cell $(c_x,c_y)\mapsto$ batch $(c_x+2c_y)\bmod 3$ & 30 sensors, 5 positions (4 moves) & 30 (simulation design); 30 sensors (offline moves) \\
+design model & current inversion & current inversion (random: none) & defect-free background \\
+design steps & 20 Adam steps of \SI{1.5}{mm} per batch, measured points fixed & 1 Adam step of \SI{8}{mm} per move, optimiser state carried & 60 Adam steps of \SI{1.5}{mm} (simulation); as moving array (offline) \\
+probes & 12, redrawn every step & 48 & 12 (simulation); 48 (offline) \\
+validation & every 10 steps, snapped layout on 4 separate probe sets, best kept & none & as adaptive batches (simulation) \\
+inversion & staged 33 / 33 / 34 updates on all points so far & 5 $\times$ 20 updates on the current 30 positions, warm start & one pass, 100 (simulation); as moving array (offline) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Random moves.} Each sensor moves in every round by the same distance as its partner in the gradient run
+from the same start, in a direction drawn uniformly at random. Path lengths are matched; net displacements are not,
+because gradient moves keep their direction from round to round (Adam momentum): after four moves gradient-moved
+sensors are \SIrange{24}{29}{mm} from their start, randomly moved ones \SIrange{13}{14}{mm}. Part of a gain of the
+gradient moves may therefore come from covering more ground.
+
+\paragraph{Larger budget.} \emph{All visited positions}: the 116--153 distinct positions of each moving array
+inverted once (100 updates), against a jittered layout with exactly the same number of points (one cell per point
+on the smallest $n_x\times n_y$ grid of aspect $6{:}5$, surplus cells dropped at random) and a cell-centred
+$13\times11$ regular grid (143 points). Random-move arrays visit 1--9 fewer distinct positions than their gradient
+partners, because some positions are measured twice.
+
+\paragraph{Second criterion.} $-\overline{\log(I+\varepsilon)}$ with $\varepsilon=10^{-3}\,\bar I$ (uniformity in which
+bright spots saturate, plus the overall illumination at unit weight, i.e.\ diagonal D-optimality), run as adaptive
+batches from the jittered starts with one, two and four shots, each followed by its re-inversion.
+
+\paragraph{Statistics.} Paired comparisons use one-sided sign tests over start layouts, ranking runs by features
+found, then false indications, then background RMS (ties dropped). Group comparisons use a one-sided Fisher test on the
+share of runs that find all five features and a one-sided Mann--Whitney test on the number found, centred on the
+baseline mean of each shot setting so that shot settings can be pooled. Pooled gains are averages of the per-shot
+differences of means, weighted by the number of designed runs, with 95\,\% bootstrap intervals (runs resampled within
+each group and shot setting, 5000 draws).
+
+\paragraph{What was fixed in advance.} Before the runs they concern: the gradient-versus-random comparison of the
+moving arrays (sign test; the scoring rule of Section~\ref{sec:scoring} was fixed after the first three of the 13
+pairs had run, so 10 pairs are fully pre-specified); the Fisher test of the adaptive batches against the static
+layouts; the same test for the re-inversions and for the second criterion; and the paired test of the adaptive
+batches against progressive static. Chosen after seeing results: detection at a fixed false-indication rate, the
+comparisons of cases (i) and (ii) against static layouts, the bootstrap intervals and the larger-budget and offline
+checks. No correction for multiple comparisons is applied; $p$-values of the exploratory analyses are descriptive.

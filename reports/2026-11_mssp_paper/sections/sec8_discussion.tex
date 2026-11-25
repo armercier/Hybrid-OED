@@ -1,0 +1,14 @@
+% Section 8: Discussion.
+\section{Discussion}\label{sec:discussion}
+\begin{notes}
+\item Where adaptivity helps: strongest when the number of sensors is limited and they can be moved (case (i)); weaker at a fixed scan budget, and not significant once scan and inversion are matched (case (iii)). Depends on the 24 Nov controls (offline moves, simulation design).
+\item The staged inversion: needed by adaptive design, costs detection; re-inverting at the end recovers it.
+\item Scoring: amplitude vs fixed false-indication rate; defect-free reference scan in practice.
+\item Model error: through-hole and glued mass as plugs; containment of unmodelled features is the open weakness of sparse layouts (spill 19--45\,mm vs 10--16\,mm for full scans).
+\item Limitations: one specimen, five features, D4 drives most differences; replay instead of a live closed loop; no S0, edges not modelled, $v_z$ only; background calibrated on the full scan; random-move net-displacement confound; multiple exploratory views (state them).
+\item Practical reading: a dense regular scan of about 110 points already recovers everything on this plate; adaptivity is for settings where measurements or channels are expensive (contact sensors, robot-mounted arrays).
+\item Transfer to metal plates / other specimens; live closed loop as next step.
+\item \textbf{Framing (25 Nov)}: the design criterion is what places sensors well; running it adaptively reaches the result of a best-case advance plan without one. Planning beforehand needs a calibrated model of each specimen and geometry and a design run per setup; our offline control had a model calibrated on the full defect scan.
+\item Irregular geometries (curved edges, stiffeners, cut-outs, areas the laser cannot reach): a regular grid may not fit; an illumination-based adaptive design may have an edge there. Untested (rectangular scan area); future work.
+\item Dense uniform scans are the honest ceiling when scanning is cheap: at $\approx$145 points a uniform layout is as good for detection with a cleaner background.
+\end{notes}
