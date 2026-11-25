@@ -12,3 +12,9 @@
 # photo originals stay on the server; only the JPG copies used by the figures are versioned
 LDV_photos/*.HEIC
 LDV_photos/*.heic
+# the repository's root .gitignore excludes *.pdf and *.png; re-include the paper's figures and the archived outline
+!figures/*.pdf
+!figures/*.png
+!figures/source/*.pdf
+!figures/source/*.png
+!outline/*.pdf
